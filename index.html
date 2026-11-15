@@ -7,34 +7,14 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100dvh;
-      overflow: hidden;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f1f5f9;
-      user-select: none;
+      margin: 0; padding: 0; height: 100dvh; overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f1f5f9; user-select: none;
     }
-    input {
-      user-select: text;
-    }
-    .scroll-area {
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: #cbd5e1 transparent;
-    }
-    .scroll-area::-webkit-scrollbar {
-      width: 4px;
-    }
-    .scroll-area::-webkit-scrollbar-thumb {
-      background-color: #cbd5e1;
-      border-radius: 9999px;
-    }
+    input { user-select: text; }
+    .scroll-area { overflow-y: auto; scrollbar-width: thin; }
   </style>
 </head>
 <body class="flex flex-col h-[100dvh] w-full max-w-4xl mx-auto bg-slate-100 text-slate-800">
@@ -53,75 +33,47 @@
     </div>
 
     <div class="flex items-center gap-1.5 shrink-0">
-      <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" title="Status Koneksi"></span>
+      <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
       <span id="modeBadge" class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700">
         PASIEN
       </span>
-      <button id="btnQr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 hover:bg-emerald-50 font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
+      <button id="btnQr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
         QR
       </button>
-      <button id="btnLogout" onclick="logoutStaff()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
+      <button id="btnLogout" onclick="logoutStaff()" class="hidden bg-rose-600 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
         Keluar
       </button>
     </div>
   </header>
 
-  <!-- MAIN CONTENT (1 LAYAR PENUH) -->
+  <!-- MAIN CONTENT -->
   <main class="flex-1 flex flex-col gap-2 p-2 min-h-0">
-
-    <!-- BAGIAN 1: ANTRIAN UTAMA (A / B / C) -->
+    <!-- BAGIAN 1: ANTRIAN UTAMA -->
     <section class="grid grid-cols-3 gap-2 shrink-0">
-      <!-- UMUM (A) -->
       <div class="bg-white rounded-xl border-2 border-sky-500 p-2 flex flex-col items-center justify-between shadow-sm">
-        <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
-          UMUM (A)
-        </span>
-        <div id="valA" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
-          A0
-        </div>
+        <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md">UMUM (A)</span>
+        <div id="valA" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5">A0</div>
         <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
-          <button onclick="stepCounter('A', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
-            -1
-          </button>
-          <button onclick="stepCounter('A', 1)" class="col-span-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
-            NEXT
-          </button>
+          <button onclick="stepCounter('A', -1)" class="col-span-1 bg-slate-200 text-slate-700 font-bold text-xs py-1.5 rounded-lg">-1</button>
+          <button onclick="stepCounter('A', 1)" class="col-span-2 bg-sky-600 text-white font-extrabold text-xs py-1.5 rounded-lg">NEXT</button>
         </div>
       </div>
 
-      <!-- BPJS (B) -->
       <div class="bg-white rounded-xl border-2 border-emerald-600 p-2 flex flex-col items-center justify-between shadow-sm">
-        <span class="w-full text-center bg-emerald-700 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
-          BPJS (B)
-        </span>
-        <div id="valB" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
-          B0
-        </div>
+        <span class="w-full text-center bg-emerald-700 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md">BPJS (B)</span>
+        <div id="valB" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5">B0</div>
         <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
-          <button onclick="stepCounter('B', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
-            -1
-          </button>
-          <button onclick="stepCounter('B', 1)" class="col-span-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
-            NEXT
-          </button>
+          <button onclick="stepCounter('B', -1)" class="col-span-1 bg-slate-200 text-slate-700 font-bold text-xs py-1.5 rounded-lg">-1</button>
+          <button onclick="stepCounter('B', 1)" class="col-span-2 bg-emerald-700 text-white font-extrabold text-xs py-1.5 rounded-lg">NEXT</button>
         </div>
       </div>
 
-      <!-- PRIORITAS (C) -->
       <div class="bg-white rounded-xl border-2 border-amber-500 p-2 flex flex-col items-center justify-between shadow-sm">
-        <span class="w-full text-center bg-amber-500 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
-          PRIORITAS (C)
-        </span>
-        <div id="valC" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
-          C0
-        </div>
+        <span class="w-full text-center bg-amber-500 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md">PRIORITAS (C)</span>
+        <div id="valC" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5">C0</div>
         <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
-          <button onclick="stepCounter('C', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
-            -1
-          </button>
-          <button onclick="stepCounter('C', 1)" class="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
-            NEXT
-          </button>
+          <button onclick="stepCounter('C', -1)" class="col-span-1 bg-slate-200 text-slate-700 font-bold text-xs py-1.5 rounded-lg">-1</button>
+          <button onclick="stepCounter('C', 1)" class="col-span-2 bg-amber-500 text-white font-extrabold text-xs py-1.5 rounded-lg">NEXT</button>
         </div>
       </div>
     </section>
@@ -131,29 +83,14 @@
       <div class="flex items-center justify-between gap-2 mb-1.5 shrink-0">
         <div class="flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>
-          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wide">
-            OBAT SEDANG DIRACIK
-          </h2>
+          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase">OBAT SEDANG DIRACIK</h2>
         </div>
-        <button id="undoDiracikBtn" onclick="undoLast('diracik')" class="staff-only hidden bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+        <button onclick="undoLast('diracik')" class="staff-only hidden bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded">↩ Undo</button>
       </div>
-
-      <!-- INPUT PETUGAS DIRACIK -->
       <form onsubmit="handleAddItems(event, 'diracik')" class="staff-only hidden flex gap-1.5 mb-2 shrink-0">
-        <input
-          id="inputDiracik"
-          type="text"
-          placeholder="Ketik nomor (cth: A12, C3, B5)..."
-          class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:border-indigo-600"
-        />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 active:scale-95">
-          Tambah
-        </button>
+        <input id="inputDiracik" type="text" placeholder="Ketik nomor (cth: A12, C3, B5)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase" />
+        <button type="submit" class="bg-indigo-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0">Tambah</button>
       </form>
-
-      <!-- DAFTAR NOMOR DIRACIK -->
       <div id="listDiracik" class="scroll-area flex-1 flex flex-wrap content-start gap-1.5">
         <p class="w-full text-center text-xs text-slate-400 italic my-auto">Belum ada antrian diracik</p>
       </div>
@@ -164,158 +101,276 @@
       <div class="flex items-center justify-between gap-2 mb-1.5 shrink-0">
         <div class="flex items-center gap-1.5">
           <span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>
-          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wide">
-            OBAT SEDANG DIKONFIRMASI
-          </h2>
+          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase">OBAT SEDANG DIKONFIRMASI</h2>
         </div>
-        <button id="undoKonfirmasiBtn" onclick="undoLast('konfirmasi')" class="staff-only hidden bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+        <button onclick="undoLast('konfirmasi')" class="staff-only hidden bg-slate-100 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded">↩ Undo</button>
       </div>
-
-      <!-- INPUT PETUGAS KONFIRMASI -->
       <form onsubmit="handleAddItems(event, 'konfirmasi')" class="staff-only hidden flex gap-1.5 mb-2 shrink-0">
-        <input
-          id="inputKonfirmasi"
-          type="text"
-          placeholder="Ketik nomor (cth: A10, C2, B8)..."
-          class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:border-rose-600"
-        />
-        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 active:scale-95">
-          Tambah
-        </button>
+        <input id="inputKonfirmasi" type="text" placeholder="Ketik nomor (cth: A10, C2, B8)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase" />
+        <button type="submit" class="bg-rose-600 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0">Tambah</button>
       </form>
-
-      <!-- DAFTAR NOMOR KONFIRMASI -->
       <div id="listKonfirmasi" class="scroll-area flex-1 flex flex-wrap content-start gap-1.5">
         <p class="w-full text-center text-xs text-slate-400 italic my-auto">Belum ada antrian dikonfirmasi</p>
       </div>
     </section>
-
   </main>
 
   <!-- MODAL LOGIN PETUGAS -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+  <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200">
       <h3 class="text-base font-extrabold text-emerald-900 text-center">Login Petugas Farmasi</h3>
       <p class="text-xs text-slate-500 text-center mt-0.5 mb-4">Depo Central Farmasi</p>
       <form onsubmit="submitLogin(event)" class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
-          <input id="loginUser" type="text" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-700" placeholder="Masukkan username" />
+          <input id="loginUser" type="text" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan username" />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-          <input id="loginPass" type="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-700" placeholder="Masukkan password" />
+          <input id="loginPass" type="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan password" />
         </div>
         <p id="loginErr" class="hidden text-xs font-semibold text-rose-600 text-center">Username atau password salah!</p>
         <div class="flex gap-2 pt-1">
-          <button type="button" onclick="closeLoginModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-2.5 rounded-lg">
-            Batal
-          </button>
-          <button type="submit" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs py-2.5 rounded-lg">
-            Masuk
-          </button>
+          <button type="button" onclick="closeLoginModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg">Batal</button>
+          <button type="submit" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2.5 rounded-lg">Masuk</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- MODAL QR CODE PASIEN -->
-  <div id="qrModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+  <!-- MODAL QR CODE -->
+  <div id="qrModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200 flex flex-col items-center text-center">
       <h3 class="text-sm font-extrabold text-emerald-900">QR Code Antrian Pasien</h3>
       <p class="text-[11px] text-slate-500 mt-0.5 mb-3">Scan untuk memantau antrian obat secara real-time</p>
       <div id="qrcodeBox" class="p-3 bg-white border-2 border-emerald-800 rounded-xl flex items-center justify-center"></div>
       <p id="qrUrlText" class="text-[10px] text-slate-500 break-all mt-2.5 mb-3 px-1"></p>
       <div class="flex gap-2 w-full">
-        <button onclick="window.print()" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs py-2 rounded-lg">
-          Cetak
-        </button>
-        <button onclick="closeQrModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-2 rounded-lg">
-          Tutup
-        </button>
+        <button onclick="window.print()" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2 rounded-lg">Cetak</button>
+        <button onclick="closeQrModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-lg">Tutup</button>
       </div>
     </div>
   </div>
 
-  <!-- FIREBASE REALTIME DATABASE SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-    const firebaseConfig = {
-      databaseURL: "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const queueRef = ref(db, "depo_central_farmasi/queue_state");
-
-    let state = {
-      A: 0,
-      B: 0,
-      C: 0,
-      diracik: [],
-      konfirmasi: []
-    };
-
-    let historyStack = {
-      diracik: [],
-      konfirmasi: []
-    };
-
+  <!-- SCRIPT UTAMA (LANGSUNG JALAN TANPA MENUNGGU MODUL LUAR) -->
+  <script>
+    const DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/queue_state.json";
+    let state = { A: 0, B: 0, C: 0, diracik: [], konfirmasi: [] };
+    let historyStack = { diracik: [], konfirmasi: [] };
     let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
 
-    // JAM WITA REAL-TIME
+    // 1. JAM WITA REAL-TIME
     function updateWitaClock() {
       const now = new Date();
-      const dateStr = now.toLocaleDateString("id-ID", {
-        timeZone: "Asia/Makassar",
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-      });
-      const timeStr = now.toLocaleTimeString("id-ID", {
-        timeZone: "Asia/Makassar",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      }).replace(/\./g, ":");
-      document.getElementById("witaClock").textContent = `${dateStr} • ${timeStr} WITA`;
+      const dateStr = now.toLocaleDateString("id-ID", { timeZone: "Asia/Makassar", day: "2-digit", month: "short", year: "numeric" });
+      const timeStr = now.toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).replace(/\./g, ":");
+      document.getElementById("witaClock").textContent = dateStr + " • " + timeStr + " WITA";
     }
     updateWitaClock();
     setInterval(updateWitaClock, 1000);
 
-    // PENGURUTAN OTOMATIS A -> C -> B DARI ANGKA TERKECIL
+    // 2. KETUK 5X PADA JUDUL RS
+    let tapCount = 0;
+    let tapTimer = null;
+    document.getElementById("secretTrigger").addEventListener("click", function() {
+      if (isStaff) return;
+      tapCount++;
+      clearTimeout(tapTimer);
+      if (tapCount >= 5) {
+        tapCount = 0;
+        document.getElementById("loginErr").classList.add("hidden");
+        document.getElementById("loginUser").value = "";
+        document.getElementById("loginPass").value = "";
+        document.getElementById("loginModal").classList.remove("hidden");
+      } else {
+        tapTimer = setTimeout(function() { tapCount = 0; }, 2000);
+      }
+    });
+
+    function closeLoginModal() { document.getElementById("loginModal").classList.add("hidden"); }
+
+    function submitLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("loginUser").value.trim();
+      const p = document.getElementById("loginPass").value.trim();
+      if (u === "Farmasi" && p === "123321") {
+        isStaff = true;
+        localStorage.setItem("rsss_farmasi_staff", "true");
+        closeLoginModal();
+        renderUI();
+      } else {
+        document.getElementById("loginErr").classList.remove("hidden");
+      }
+    }
+
+    function logoutStaff() {
+      isStaff = false;
+      localStorage.removeItem("rsss_farmasi_staff");
+      renderUI();
+    }
+
+    // 3. PENGURUTAN A -> C -> B
     function sortQueueTokens(list) {
       const order = { A: 1, C: 2, B: 3 };
-      return [...new Set(list)].sort((a, b) => {
-        const matchA = a.match(/^([ACB])(\d+)(.*)$/i);
-        const matchB = b.match(/^([ACB])(\d+)(.*)$/i);
-        const prefixA = matchA ? matchA[1].toUpperCase() : "Z";
-        const prefixB = matchB ? matchB[1].toUpperCase() : "Z";
-        const rankA = order[prefixA] || 99;
-        const rankB = order[prefixB] || 99;
-
-        if (rankA !== rankB) return rankA - rankB;
-
-        const numA = matchA ? parseInt(matchA[2], 10) : 999999;
-        const numB = matchB ? parseInt(matchB[2], 10) : 999999;
-        if (numA !== numB) return numA - numB;
-
+      return Array.from(new Set(list)).sort(function(a, b) {
+        const mA = a.match(/^([ACB])(\d+)(.*)$/i);
+        const mB = b.match(/^([ACB])(\d+)(.*)$/i);
+        const rA = mA ? (order[mA[1].toUpperCase()] || 99) : 99;
+        const rB = mB ? (order[mB[1].toUpperCase()] || 99) : 99;
+        if (rA !== rB) return rA - rB;
+        const nA = mA ? parseInt(mA[2], 10) : 999999;
+        const nB = mB ? parseInt(mB[2], 10) : 999999;
+        if (nA !== nB) return nA - nB;
         return a.localeCompare(b, "id", { numeric: true });
       });
     }
 
     function getBadgeColor(token) {
-      const first = token.charAt(0).toUpperCase();
-      if (first === "A") return "bg-sky-50 text-sky-900 border-sky-400";
-      if (first === "B") return "bg-emerald-50 text-emerald-900 border-emerald-500";
-      if (first === "C") return "bg-amber-50 text-amber-900 border-amber-400";
+      const f = token.charAt(0).toUpperCase();
+      if (f === "A") return "bg-sky-50 text-sky-900 border-sky-400";
+      if (f === "B") return "bg-emerald-50 text-emerald-900 border-emerald-500";
+      if (f === "C") return "bg-amber-50 text-amber-900 border-amber-400";
       return "bg-slate-100 text-slate-800 border-slate-300";
     }
 
     function renderUI() {
-      document.getElementById("valA").textContent = "A" + (state.A || 
+      document.getElementById("valA").textContent = "A" + (state.A || 0);
+      document.getElementById("valB").textContent = "B" + (state.B || 0);
+      document.getElementById("valC").textContent = "C" + (state.C || 0);
+      renderList("listDiracik", state.diracik || [], "diracik", "Belum ada antrian diracik");
+      renderList("listKonfirmasi", state.konfirmasi || [], "konfirmasi", "Belum ada antrian dikonfirmasi");
+
+      document.querySelectorAll(".staff-only").forEach(function(el) {
+        el.classList.toggle("hidden", !isStaff);
+      });
+
+      const badge = document.getElementById("modeBadge");
+      const btnQr = document.getElementById("btnQr");
+      const btnLogout = document.getElementById("btnLogout");
+      if (isStaff) {
+        badge.textContent = "PETUGAS";
+        badge.className = "text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-amber-400 text-slate-900";
+        btnQr.classList.remove("hidden");
+        btnLogout.classList.remove("hidden");
+      } else {
+        badge.textContent = "PASIEN";
+        badge.className = "text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700";
+        btnQr.classList.add("hidden");
+        btnLogout.classList.add("hidden");
+      }
+    }
+
+    function renderList(id, items, key, emptyMsg) {
+      const box = document.getElementById(id);
+      const sorted = sortQueueTokens(items);
+      if (sorted.length === 0) {
+        box.innerHTML = '<p class="w-full text-center text-xs text-slate-400 italic my-auto">' + emptyMsg + '</p>';
+        return;
+      }
+      box.innerHTML = sorted.map(function(t) {
+        const cls = getBadgeColor(t);
+        if (isStaff) {
+          return '<button onclick="removeToken(\'' + key + '\', \'' + t.replace(/'/g, "\\'") + '\')" class="' + cls + ' border-2 px-2.5 py-1 rounded-lg font-extrabold text-sm flex items-center gap-1.5"><span>' + t + '</span><span class="text-xs opacity-60">✕</span></button>';
+        }
+        return '<span class="' + cls + ' border-2 px-3 py-1 rounded-lg font-extrabold text-sm">' + t + '</span>';
+      }).join("");
+    }
+
+    // 4. SINKRONISASI FIREBASE REST (RINGAN & CEPAT)
+    let isSaving = false;
+    async function syncFromFirebase() {
+      if (isSaving) return;
+      try {
+        const res = await fetch(DB_URL + "?t=" + Date.now());
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
+        if (data) {
+          state.A = Number(data.A) || 0;
+          state.B = Number(data.B) || 0;
+          state.C = Number(data.C) || 0;
+          state.diracik = Array.isArray(data.diracik) ? data.diracik : [];
+          state.konfirmasi = Array.isArray(data.konfirmasi) ? data.konfirmasi : [];
+        }
+        renderUI();
+      } catch (e) {
+        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-amber-400 inline-block";
+      }
+    }
+
+    async function saveToFirebase() {
+      isSaving = true;
+      try {
+        await fetch(DB_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            A: state.A || 0,
+            B: state.B || 0,
+            C: state.C || 0,
+            diracik: sortQueueTokens(state.diracik || []),
+            konfirmasi: sortQueueTokens(state.konfirmasi || [])
+          })
+        });
+        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
+      } catch (e) {}
+      isSaving = false;
+    }
+
+    function stepCounter(type, delta) {
+      if (!isStaff) return;
+      state[type] = Math.max(0, (Number(state[type]) || 0) + delta);
+      renderUI();
+      saveToFirebase();
+    }
+
+    function handleAddItems(e, key) {
+      e.preventDefault();
+      if (!isStaff) return;
+      const inp = document.getElementById(key === "diracik" ? "inputDiracik" : "inputKonfirmasi");
+      const raw = inp.value.trim().toUpperCase();
+      if (!raw) return;
+      const tokens = raw.split(/[\s,;]+/).filter(Boolean);
+      if (tokens.length === 0) return;
+      historyStack[key].push([...(state[key] || [])]);
+      state[key] = sortQueueTokens([...(state[key] || []), ...tokens]);
+      inp.value = "";
+      renderUI();
+      saveToFirebase();
+    }
+
+    function removeToken(key, token) {
+      if (!isStaff) return;
+      historyStack[key].push([...(state[key] || [])]);
+      state[key] = (state[key] || []).filter(function(i) { return i !== token; });
+      renderUI();
+      saveToFirebase();
+    }
+
+    function undoLast(key) {
+      if (!isStaff || historyStack[key].length === 0) return;
+      state[key] = historyStack[key].pop();
+      renderUI();
+      saveToFirebase();
+    }
+
+    let qrGenerated = false;
+    function openQrModal() {
+      const url = window.location.href.split("#")[0].split("?")[0];
+      document.getElementById("qrUrlText").textContent = url;
+      if (!qrGenerated && typeof QRCode !== "undefined") {
+        document.getElementById("qrcodeBox").innerHTML = "";
+        new QRCode(document.getElementById("qrcodeBox"), { text: url, width: 190, height: 190, colorDark: "#064e3b", colorLight: "#ffffff" });
+        qrGenerated = true;
+      }
+      document.getElementById("qrModal").classList.remove("hidden");
+    }
+
+    function closeQrModal() { document.getElementById("qrModal").classList.add("hidden"); }
+
+    renderUI();
+    syncFromFirebase();
+    setInterval(syncFromFirebase, 2500);
+  </script>
+</body>
+</html>
