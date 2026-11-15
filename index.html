@@ -16,6 +16,8 @@
     input { user-select: text; }
     .scroll-area-y { overflow-y: auto; scrollbar-width: thin; }
     .scroll-area-x { overflow-x: auto; scrollbar-width: thin; }
+    .smooth-box { transition: flex 0.35s ease; }
+    .smooth-num { transition: font-size 0.35s ease; }
   </style>
 </head>
 <body class="flex flex-col h-[100dvh] w-full max-w-7xl mx-auto bg-slate-100 text-slate-800">
@@ -49,14 +51,14 @@
 
   <!-- MAIN CONTENT -->
   <main class="flex-1 flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-2.5 min-h-0">
-    <!-- BAGIAN 1: ANTRIAN UTAMA (3 SEJAJAR) -->
-    <section class="flex-[0.82] grid grid-cols-3 gap-2 sm:gap-2.5 min-h-0">
+    <!-- BAGIAN 1: ANTRIAN UTAMA (DINAMIS MENYESUAIKAN JUMLAH BARIS RACIKAN) -->
+    <section id="secUtama" class="smooth-box flex-[1.55] grid grid-cols-3 gap-2 sm:gap-2.5 min-h-0">
       <div class="bg-white rounded-2xl border-[3px] border-sky-500 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
         <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
           UMUM (A)
         </span>
         <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valA" class="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none">
+          <div id="valA" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
             A0
           </div>
         </div>
@@ -71,7 +73,7 @@
           BPJS (B)
         </span>
         <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valB" class="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none">
+          <div id="valB" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
             B0
           </div>
         </div>
@@ -86,7 +88,7 @@
           PRIORITAS (C)
         </span>
         <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valC" class="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none">
+          <div id="valC" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
             C0
           </div>
         </div>
@@ -97,8 +99,8 @@
       </div>
     </section>
 
-    <!-- BAGIAN 2: OBAT SEDANG DIRACIK (PITA JUDUL PENUH BIRU INDIGO, MUAT 3 BARIS) -->
-    <section class="flex-[1.55] bg-white rounded-2xl border-2 border-indigo-600 p-2 sm:p-2.5 flex flex-col min-h-0 shadow-sm">
+    <!-- BAGIAN 2: OBAT SEDANG DIRACIK (DINAMIS MEMBESAR SAAT ITEM BERTAMBAH) -->
+    <section id="secDiracik" class="smooth-box flex-[0.85] bg-white rounded-2xl border-2 border-indigo-600 p-2 sm:p-2.5 flex flex-col min-h-0 shadow-sm">
       <div class="w-full bg-indigo-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1.5 shrink-0">
         <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
           OBAT SEDANG DIRACIK
@@ -116,8 +118,8 @@
       </div>
     </section>
 
-    <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI (PITA JUDUL PENUH MERAH ROSE, 1 BARIS) -->
-    <section class="flex-[0.62] bg-white rounded-2xl border-2 border-rose-600 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
+    <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI (1 BARIS) -->
+    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-rose-600 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
       <div class="w-full bg-rose-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
         <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
           OBAT SEDANG DIKONFIRMASI
@@ -135,8 +137,8 @@
       </div>
     </section>
 
-    <!-- BAGIAN 4: TIDAK DAPAT OBAT (PITA JUDUL PENUH UNGU, 1 BARIS) -->
-    <section class="flex-[0.62] bg-white rounded-2xl border-2 border-purple-700 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
+    <!-- BAGIAN 4: TIDAK DAPAT OBAT (1 BARIS) -->
+    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-purple-700 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
       <div class="w-full bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
         <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
           TIDAK DAPAT OBAT
@@ -270,6 +272,46 @@
       return "bg-slate-100 text-slate-800 border-slate-400";
     }
 
+    // PENYESUAIAN PROPORSI OTOMATIS ABC BERDASARKAN JUMLAH BARIS RACIKAN
+    function adjustDynamicLayout() {
+      const secUtama = document.getElementById("secUtama");
+      const secDiracik = document.getElementById("secDiracik");
+      const listDiracik = document.getElementById("listDiracik");
+      const nums = [document.getElementById("valA"), document.getElementById("valB"), document.getElementById("valC")];
+
+      if (isStaff) {
+        secUtama.style.flex = "0.95";
+        secDiracik.style.flex = "1.45";
+        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
+        return;
+      }
+
+      const badges = listDiracik.querySelectorAll("span");
+      let rowCount = 1;
+      if (badges.length > 0) {
+        const tops = new Set();
+        badges.forEach(b => tops.add(Math.round(b.offsetTop / 12)));
+        rowCount = tops.size;
+      }
+
+      if (rowCount <= 1) {
+        // 0 - 1 baris racikan: ABC di atas tampil sangat besar & dominan
+        secUtama.style.flex = "1.55";
+        secDiracik.style.flex = "0.85";
+        nums.forEach(n => { n.className = "smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none"; });
+      } else if (rowCount === 2) {
+        // 2 baris racikan: ABC mengecil sedikit agar 2 baris racikan lega
+        secUtama.style.flex = "1.1";
+        secDiracik.style.flex = "1.3";
+        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none"; });
+      } else {
+        // 3+ baris racikan: ABC meramping agar 3 baris racikan muat penuh 1 layar
+        secUtama.style.flex = "0.75";
+        secDiracik.style.flex = "1.65";
+        nums.forEach(n => { n.className = "smooth-num text-3xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
+      }
+    }
+
     function renderUI() {
       document.getElementById("valA").textContent = "A" + (state.A || 0);
       document.getElementById("valB").textContent = "B" + (state.B || 0);
@@ -296,6 +338,8 @@
         btnQr.classList.add("hidden");
         btnLogout.classList.add("hidden");
       }
+
+      requestAnimationFrame(adjustDynamicLayout);
     }
 
     function renderList(id, items, key, emptyMsg) {
@@ -408,6 +452,7 @@
 
     function closeQrModal() { document.getElementById("qrModal").classList.add("hidden"); }
 
+    window.addEventListener("resize", adjustDynamicLayout);
     renderUI();
     syncFromFirebase();
     setInterval(syncFromFirebase, 2500);
