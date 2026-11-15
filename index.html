@@ -16,152 +16,306 @@
       padding: 0;
       height: 100dvh;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background-color: #f1f5f9;
-      color: #0f172a;
       user-select: none;
     }
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    input {
+      user-select: text;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
+    .scroll-area {
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #cbd5e1 transparent;
+    }
+    .scroll-area::-webkit-scrollbar {
+      width: 4px;
+    }
+    .scroll-area::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 9999px;
     }
   </style>
 </head>
-<body class="flex flex-col h-[100dvh] max-w-4xl mx-auto bg-slate-100 shadow-sm">
+<body class="flex flex-col h-[100dvh] w-full max-w-4xl mx-auto bg-slate-100 text-slate-800">
 
-  <!-- HEADER: JUDUL RS (KETUK/KLIK 5X UNTUK LOGIN PETUGAS) & WAKTU REALTIME -->
-  <header class="bg-emerald-800 text-white px-3 py-2 shrink-0 shadow">
-    <div class="flex items-center justify-between gap-2">
-      <div id="secret-trigger" class="cursor-pointer active:opacity-80 flex-1 min-w-0">
-        <h1 class="text-sm sm:text-base font-extrabold leading-tight tracking-tight truncate">
-          Farmasi RSUD Sultan Suriansyah Banjarmasin
-        </h1>
-        <div class="flex items-center gap-2 text-[11px] sm:text-xs text-emerald-100 mt-0.5">
-          <span>Depo Central Farmasi</span>
-          <span>•</span>
-          <span id="live-datetime" class="font-medium">Memuat waktu...</span>
-        </div>
+  <!-- HEADER -->
+  <header class="bg-emerald-900 text-white px-3 py-2.5 flex items-center justify-between shadow-md shrink-0">
+    <div id="secretTrigger" class="cursor-pointer active:opacity-80 pr-2">
+      <h1 class="text-sm sm:text-base font-bold leading-tight tracking-tight">
+        Farmasi RSUD Sultan Suriansyah Banjarmasin
+      </h1>
+      <div class="flex items-center gap-1.5 text-[11px] sm:text-xs text-emerald-200 mt-0.5">
+        <span class="font-medium">Depo Central Farmasi</span>
+        <span>•</span>
+        <span id="witaClock">Memuat waktu...</span>
       </div>
+    </div>
 
-      <!-- STATUS KONEKSI & TOMBOL KHUSUS PETUGAS -->
-      <div class="flex items-center gap-1.5 shrink-0">
-        <span id="conn-dot" title="Status Koneksi Database" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-        <span id="mode-badge" class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-200">
-          Pasien
-        </span>
-        <button id="btn-qr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-bold px-2.5 py-1 rounded shadow-sm active:scale-95">
-          QR
-        </button>
-        <button id="btn-reset" onclick="resetAll()" class="hidden bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded shadow-sm active:scale-95">
-          Reset
-        </button>
-        <button id="btn-logout" onclick="logoutPetugas()" class="hidden bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold px-2 py-1 rounded shadow-sm active:scale-95">
-          Keluar
-        </button>
-      </div>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" title="Status Koneksi"></span>
+      <span id="modeBadge" class="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700">
+        PASIEN
+      </span>
+      <button id="btnQr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 hover:bg-emerald-50 font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
+        QR
+      </button>
+      <button id="btnLogout" onclick="logoutStaff()" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
+        Keluar
+      </button>
     </div>
   </header>
 
-  <!-- KONTEN UTAMA (PAS 1 LAYAR HP) -->
-  <main class="flex-1 flex flex-col justify-between p-2 sm:p-3 gap-2 overflow-hidden">
+  <!-- MAIN CONTENT (1 LAYAR PENUH) -->
+  <main class="flex-1 flex flex-col gap-2 p-2 min-h-0">
 
-    <!-- BARIS 1: 3 KOTAK SEJAJAR (UMUM A, BPJS B, PRIORITAS C) -->
+    <!-- BAGIAN 1: ANTRIAN UTAMA (A / B / C) -->
     <section class="grid grid-cols-3 gap-2 shrink-0">
-      <!-- KOTAK A: UMUM -->
-      <div class="bg-white rounded-xl border-2 border-sky-500 shadow-sm flex flex-col justify-between p-2 text-center">
-        <div class="bg-sky-600 text-white text-[11px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
+      <!-- UMUM (A) -->
+      <div class="bg-white rounded-xl border-2 border-sky-500 p-2 flex flex-col items-center justify-between shadow-sm">
+        <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
           UMUM (A)
-        </div>
-        <div id="val-A" class="text-3xl sm:text-5xl font-black text-sky-950 my-2 sm:my-3 tracking-tight">
+        </span>
+        <div id="valA" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
           A0
         </div>
-        <div class="admin-only hidden grid grid-cols-3 gap-1">
-          <button onclick="updateCounter('A', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-extrabold text-xs sm:text-sm py-2 rounded-lg">
+        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
+          <button onclick="stepCounter('A', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
             -1
           </button>
-          <button onclick="updateCounter('A', 1)" class="col-span-2 bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-extrabold text-xs sm:text-sm py-2 rounded-lg shadow">
+          <button onclick="stepCounter('A', 1)" class="col-span-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
             NEXT
           </button>
         </div>
       </div>
 
-      <!-- KOTAK B: BPJS -->
-      <div class="bg-white rounded-xl border-2 border-emerald-500 shadow-sm flex flex-col justify-between p-2 text-center">
-        <div class="bg-emerald-600 text-white text-[11px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
+      <!-- BPJS (B) -->
+      <div class="bg-white rounded-xl border-2 border-emerald-600 p-2 flex flex-col items-center justify-between shadow-sm">
+        <span class="w-full text-center bg-emerald-700 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
           BPJS (B)
-        </div>
-        <div id="val-B" class="text-3xl sm:text-5xl font-black text-emerald-950 my-2 sm:my-3 tracking-tight">
+        </span>
+        <div id="valB" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
           B0
         </div>
-        <div class="admin-only hidden grid grid-cols-3 gap-1">
-          <button onclick="updateCounter('B', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-extrabold text-xs sm:text-sm py-2 rounded-lg">
+        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
+          <button onclick="stepCounter('B', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
             -1
           </button>
-          <button onclick="updateCounter('B', 1)" class="col-span-2 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm py-2 rounded-lg shadow">
+          <button onclick="stepCounter('B', 1)" class="col-span-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
             NEXT
           </button>
         </div>
       </div>
 
-      <!-- KOTAK C: PRIORITAS -->
-      <div class="bg-white rounded-xl border-2 border-amber-500 shadow-sm flex flex-col justify-between p-2 text-center">
-        <div class="bg-amber-500 text-slate-950 text-[11px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
+      <!-- PRIORITAS (C) -->
+      <div class="bg-white rounded-xl border-2 border-amber-500 p-2 flex flex-col items-center justify-between shadow-sm">
+        <span class="w-full text-center bg-amber-500 text-white text-[10px] sm:text-xs font-extrabold py-0.5 rounded-md tracking-wide">
           PRIORITAS (C)
-        </div>
-        <div id="val-C" class="text-3xl sm:text-5xl font-black text-amber-950 my-2 sm:my-3 tracking-tight">
+        </span>
+        <div id="valC" class="text-3xl sm:text-4xl font-black text-slate-800 my-1.5 tracking-tight">
           C0
         </div>
-        <div class="admin-only hidden grid grid-cols-3 gap-1">
-          <button onclick="updateCounter('C', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 text-slate-800 font-extrabold text-xs sm:text-sm py-2 rounded-lg">
+        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5">
+          <button onclick="stepCounter('C', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1.5 rounded-lg active:scale-95">
             -1
           </button>
-          <button onclick="updateCounter('C', 1)" class="col-span-2 bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm py-2 rounded-lg shadow">
+          <button onclick="stepCounter('C', 1)" class="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-1.5 rounded-lg shadow-sm active:scale-95">
             NEXT
           </button>
         </div>
       </div>
     </section>
 
-    <!-- BARIS 2: OBAT SEDANG DIRACIK -->
-    <section class="flex-1 bg-white rounded-xl border border-slate-300 shadow-sm p-2.5 flex flex-col justify-between min-h-0">
-      <div class="flex items-center justify-between gap-2 shrink-0">
+    <!-- BAGIAN 2: OBAT SEDANG DIRACIK -->
+    <section class="flex-1 bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col min-h-0 shadow-sm">
+      <div class="flex items-center justify-between gap-2 mb-1.5 shrink-0">
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
-          <h2 class="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-slate-800">
-            Obat Sedang Diracik
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 inline-block"></span>
+          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wide">
+            OBAT SEDANG DIRACIK
           </h2>
         </div>
-        <button id="undo-racik" onclick="undoList('racik')" class="admin-only hidden text-[11px] font-bold bg-slate-200 hover:bg-slate-300 text-slate-800 px-2 py-0.5 rounded">
-          Undo
+        <button id="undoDiracikBtn" onclick="undoLast('diracik')" class="staff-only hidden bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
+          ↩ Undo
         </button>
       </div>
 
-      <!-- DAFTAR HORIZONTAL MEMANJANG KE SAMPING (A -> C -> B, ANGKA TERKECIL) -->
-      <div id="list-racik" class="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar py-1.5 px-0.5">
-        <span class="text-xs text-slate-400 italic">Belum ada antrian diracik</span>
-      </div>
-
-      <!-- INPUT MANUAL PETUGAS -->
-      <form onsubmit="handleAdd(event, 'racik')" class="admin-only hidden flex gap-1.5 shrink-0 pt-1 border-t border-slate-100">
+      <!-- INPUT PETUGAS DIRACIK -->
+      <form onsubmit="handleAddItems(event, 'diracik')" class="staff-only hidden flex gap-1.5 mb-2 shrink-0">
         <input
-          id="input-racik"
+          id="inputDiracik"
           type="text"
-          placeholder="Ketik no (cth: A12, C2, B5)"
-          autocomplete="off"
-          class="flex-1 min-w-0 text-xs sm:text-sm border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-600 uppercase"
+          placeholder="Ketik nomor (cth: A12, C3, B5)..."
+          class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:border-indigo-600"
         />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white text-xs sm:text-sm font-bold px-3 py-1.5 rounded-lg shrink-0">
-          + Tambah
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 active:scale-95">
+          Tambah
         </button>
       </form>
+
+      <!-- DAFTAR NOMOR DIRACIK -->
+      <div id="listDiracik" class="scroll-area flex-1 flex flex-wrap content-start gap-1.5">
+        <p class="w-full text-center text-xs text-slate-400 italic my-auto">Belum ada antrian diracik</p>
+      </div>
     </section>
 
-    <!-- BARIS 3: OBAT SEDANG DIKONFIRMASI -->
-    <section class="flex-1 bg-white rounded-xl border border-slate-300 shadow-sm p-2.5 flex flex-col justify-between min-h-0">
-      <div class="flex items-center justify-between gap-2 shrink-0">
+    <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI -->
+    <section class="flex-1 bg-white rounded-xl border border-slate-200 p-2.5 flex flex-col min-h-0 shadow-sm">
+      <div class="flex items-center justify-between gap-2 mb-1.5 shrink-0">
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
-          <h2 class="text-
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>
+          <h2 class="text-xs sm:text-sm font-extrabold text-slate-700 uppercase tracking-wide">
+            OBAT SEDANG DIKONFIRMASI
+          </h2>
+        </div>
+        <button id="undoKonfirmasiBtn" onclick="undoLast('konfirmasi')" class="staff-only hidden bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
+          ↩ Undo
+        </button>
+      </div>
+
+      <!-- INPUT PETUGAS KONFIRMASI -->
+      <form onsubmit="handleAddItems(event, 'konfirmasi')" class="staff-only hidden flex gap-1.5 mb-2 shrink-0">
+        <input
+          id="inputKonfirmasi"
+          type="text"
+          placeholder="Ketik nomor (cth: A10, C2, B8)..."
+          class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs sm:text-sm font-semibold uppercase focus:outline-none focus:border-rose-600"
+        />
+        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-3 py-1.5 rounded-lg shrink-0 active:scale-95">
+          Tambah
+        </button>
+      </form>
+
+      <!-- DAFTAR NOMOR KONFIRMASI -->
+      <div id="listKonfirmasi" class="scroll-area flex-1 flex flex-wrap content-start gap-1.5">
+        <p class="w-full text-center text-xs text-slate-400 italic my-auto">Belum ada antrian dikonfirmasi</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL LOGIN PETUGAS -->
+  <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200">
+      <h3 class="text-base font-extrabold text-emerald-900 text-center">Login Petugas Farmasi</h3>
+      <p class="text-xs text-slate-500 text-center mt-0.5 mb-4">Depo Central Farmasi</p>
+      <form onsubmit="submitLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
+          <input id="loginUser" type="text" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-700" placeholder="Masukkan username" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+          <input id="loginPass" type="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-700" placeholder="Masukkan password" />
+        </div>
+        <p id="loginErr" class="hidden text-xs font-semibold text-rose-600 text-center">Username atau password salah!</p>
+        <div class="flex gap-2 pt-1">
+          <button type="button" onclick="closeLoginModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-2.5 rounded-lg">
+            Batal
+          </button>
+          <button type="submit" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs py-2.5 rounded-lg">
+            Masuk
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL QR CODE PASIEN -->
+  <div id="qrModal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200 flex flex-col items-center text-center">
+      <h3 class="text-sm font-extrabold text-emerald-900">QR Code Antrian Pasien</h3>
+      <p class="text-[11px] text-slate-500 mt-0.5 mb-3">Scan untuk memantau antrian obat secara real-time</p>
+      <div id="qrcodeBox" class="p-3 bg-white border-2 border-emerald-800 rounded-xl flex items-center justify-center"></div>
+      <p id="qrUrlText" class="text-[10px] text-slate-500 break-all mt-2.5 mb-3 px-1"></p>
+      <div class="flex gap-2 w-full">
+        <button onclick="window.print()" class="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-xs py-2 rounded-lg">
+          Cetak
+        </button>
+        <button onclick="closeQrModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-2 rounded-lg">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE REALTIME DATABASE SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    const firebaseConfig = {
+      databaseURL: "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const queueRef = ref(db, "depo_central_farmasi/queue_state");
+
+    let state = {
+      A: 0,
+      B: 0,
+      C: 0,
+      diracik: [],
+      konfirmasi: []
+    };
+
+    let historyStack = {
+      diracik: [],
+      konfirmasi: []
+    };
+
+    let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
+
+    // JAM WITA REAL-TIME
+    function updateWitaClock() {
+      const now = new Date();
+      const dateStr = now.toLocaleDateString("id-ID", {
+        timeZone: "Asia/Makassar",
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+      });
+      const timeStr = now.toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Makassar",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).replace(/\./g, ":");
+      document.getElementById("witaClock").textContent = `${dateStr} • ${timeStr} WITA`;
+    }
+    updateWitaClock();
+    setInterval(updateWitaClock, 1000);
+
+    // PENGURUTAN OTOMATIS A -> C -> B DARI ANGKA TERKECIL
+    function sortQueueTokens(list) {
+      const order = { A: 1, C: 2, B: 3 };
+      return [...new Set(list)].sort((a, b) => {
+        const matchA = a.match(/^([ACB])(\d+)(.*)$/i);
+        const matchB = b.match(/^([ACB])(\d+)(.*)$/i);
+        const prefixA = matchA ? matchA[1].toUpperCase() : "Z";
+        const prefixB = matchB ? matchB[1].toUpperCase() : "Z";
+        const rankA = order[prefixA] || 99;
+        const rankB = order[prefixB] || 99;
+
+        if (rankA !== rankB) return rankA - rankB;
+
+        const numA = matchA ? parseInt(matchA[2], 10) : 999999;
+        const numB = matchB ? parseInt(matchB[2], 10) : 999999;
+        if (numA !== numB) return numA - numB;
+
+        return a.localeCompare(b, "id", { numeric: true });
+      });
+    }
+
+    function getBadgeColor(token) {
+      const first = token.charAt(0).toUpperCase();
+      if (first === "A") return "bg-sky-50 text-sky-900 border-sky-400";
+      if (first === "B") return "bg-emerald-50 text-emerald-900 border-emerald-500";
+      if (first === "C") return "bg-amber-50 text-amber-900 border-amber-400";
+      return "bg-slate-100 text-slate-800 border-slate-300";
+    }
+
+    function renderUI() {
+      document.getElementById("valA").textContent = "A" + (state.A || 
