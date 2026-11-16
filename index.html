@@ -2,460 +2,782 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Antrian Farmasi RSUD Sultan Suriansyah Banjarmasin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Antrian Obat - Depo Central Farmasi RSUD Sultan Suriansyah</title>
+
+  <!-- Firebase SDK (Compat v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- QRCode.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0; height: 100dvh; overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f1f5f9; user-select: none;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    input { user-select: text; }
-    .scroll-area-y { overflow-y: auto; scrollbar-width: thin; }
-    .scroll-area-x { overflow-x: auto; scrollbar-width: thin; }
-    .smooth-box { transition: flex 0.35s ease; }
-    .smooth-num { transition: font-size 0.35s ease; }
+
+    body {
+      background-color: #0b132b;
+      color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(90deg, #1c2541, #0b132b);
+      padding: 12px 20px;
+      border-bottom: 2px solid #3a506b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .header-title h1 {
+      font-size: clamp(16px, 2.2vw, 24px);
+      color: #5bc0be;
+      letter-spacing: 0.5px;
+    }
+
+    .header-title p {
+      font-size: clamp(12px, 1.4vw, 15px);
+      color: #cbd5e1;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #clock {
+      font-size: clamp(14px, 1.8vw, 20px);
+      font-weight: bold;
+      background: #1c2541;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid #3a506b;
+      color: #6fffe9;
+    }
+
+    .btn-mode {
+      background: #3a506b;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .btn-mode:hover {
+      background: #5bc0be;
+      color: #0b132b;
+    }
+
+    /* CONTAINER UTAMA */
+    main {
+      flex: 1;
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* BARIS ATAS: NOMOR ANTRIAN UTAMA (A, B, C) */
+    .top-queues {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+    }
+
+    .queue-card {
+      background: #1c2541;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      border: 2px solid #3a506b;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .queue-card.umum { border-top: 6px solid #38bdf8; }
+    .queue-card.bpjs { border-top: 6px solid #4ade80; }
+    .queue-card.prioritas { border-top: 6px solid #facc15; }
+
+    .queue-label {
+      font-size: clamp(14px, 1.8vw, 20px);
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #e2e8f0;
+    }
+
+    .queue-number {
+      font-size: clamp(42px, 6.5vw, 84px);
+      font-weight: 900;
+      margin: 10px 0;
+      line-height: 1;
+    }
+
+    .umum .queue-number { color: #38bdf8; }
+    .bpjs .queue-number { color: #4ade80; }
+    .prioritas .queue-number { color: #facc15; }
+
+    /* PANEL KONTROL PETUGAS DI KARTU ANTRIAN */
+    .staff-controls {
+      display: none;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed #3a506b;
+    }
+
+    body.staff-mode .staff-controls {
+      display: flex;
+    }
+
+    .btn-ctrl {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      color: #0b132b;
+    }
+
+    .btn-next { background: #4ade80; }
+    .btn-prev { background: #94a3b8; }
+    .btn-call { background: #38bdf8; }
+    .btn-set { background: #facc15; }
+
+    /* BARIS BAWAH: STATUS RACIKAN */
+    .status-sections {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      flex: 1;
+    }
+
+    .status-box {
+      background: #1c2541;
+      border-radius: 14px;
+      padding: 15px;
+      border: 2px solid #3a506b;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .status-header {
+      font-size: clamp(15px, 1.7vw, 20px);
+      font-weight: bold;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #3a506b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .box-racik .status-header { color: #6fffe9; }
+    .box-konfirm .status-header { color: #fb923c; }
+    .box-kosong .status-header { color: #f87171; }
+
+    /* INPUT PETUGAS DI MASING-MASING BOX STATUS */
+    .staff-add-form {
+      display: none;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    body.staff-mode .staff-add-form {
+      display: flex;
+    }
+
+    .staff-add-form input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #3a506b;
+      background: #0b132b;
+      color: #fff;
+      font-size: 14px;
+    }
+
+    .staff-add-form button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #5bc0be;
+      color: #0b132b;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* BADGE NOMOR DI DALAM BOX STATUS */
+    .badge-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-content: flex-start;
+    }
+
+    .queue-badge {
+      background: #0b132b;
+      border: 2px solid #5bc0be;
+      color: #ffffff;
+      font-size: clamp(18px, 2.2vw, 26px);
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 10px;
+      user-select: none;
+    }
+
+    .box-konfirm .queue-badge { border-color: #fb923c; color: #fed7aa; }
+    .box-kosong .queue-badge { border-color: #f87171; color: #fecaca; }
+
+    body.staff-mode .queue-badge {
+      cursor: pointer;
+      position: relative;
+    }
+
+    body.staff-mode .queue-badge:hover {
+      background: #7f1d1d;
+      border-color: #ef4444;
+    }
+
+    body.staff-mode .queue-badge::after {
+      content: " ✕";
+      font-size: 14px;
+      color: #f87171;
+    }
+
+    /* PANEL KHUSUS PETUGAS (RESET & UNDO) */
+    #staffResetPanel {
+      display: none;
+      background: #1c2541;
+      border: 2px solid #ef4444;
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+      margin-top: 5px;
+    }
+
+    body.staff-mode #staffResetPanel {
+      display: block;
+    }
+
+    .btn-reset-all {
+      background: #dc2626;
+      color: #ffffff;
+      border: none;
+      padding: 12px 22px;
+      font-size: 16px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .btn-reset-all:hover {
+      background: #b91c1c;
+    }
+
+    #areaUndoReset {
+      display: none;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #ef4444;
+    }
+
+    .btn-undo-all {
+      background: #f59e0b;
+      color: #0b132b;
+      border: none;
+      padding: 10px 20px;
+      font-size: 15px;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* FOOTER QR & RUNNING INFO */
+    footer {
+      background: #1c2541;
+      padding: 10px 20px;
+      border-top: 2px solid #3a506b;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .qr-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #qrcode {
+      background: #fff;
+      padding: 5px;
+      border-radius: 6px;
+    }
+
+    .qr-text {
+      font-size: 13px;
+      color: #cbd5e1;
+      max-width: 320px;
+    }
+
+    /* MODAL LOGIN PETUGAS */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      padding: 15px;
+    }
+
+    .modal-box {
+      background: #1c2541;
+      border: 2px solid #5bc0be;
+      border-radius: 12px;
+      padding: 22px;
+      width: 100%;
+      max-width: 350px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .modal-box h3 {
+      color: #6fffe9;
+      text-align: center;
+    }
+
+    .modal-box input {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #3a506b;
+      background: #0b132b;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* RESPONSIF HP */
+    @media (max-width: 768px) {
+      .top-queues, .status-sections {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
-<body class="flex flex-col h-[100dvh] w-full max-w-7xl mx-auto bg-slate-100 text-slate-800">
+<body>
 
   <!-- HEADER -->
-  <header class="bg-emerald-900 text-white px-3 sm:px-5 py-2 flex items-center justify-between shadow-md shrink-0">
-    <div id="secretTrigger" class="cursor-pointer active:opacity-80 pr-2">
-      <h1 class="text-sm sm:text-lg lg:text-xl font-bold leading-tight tracking-tight">
-        Farmasi RSUD Sultan Suriansyah Banjarmasin
-      </h1>
-      <div class="flex items-center gap-1.5 text-[11px] sm:text-xs lg:text-sm text-emerald-200 mt-0.5">
-        <span class="font-medium">Depo Central Farmasi</span>
-        <span>•</span>
-        <span id="witaClock">Memuat waktu...</span>
-      </div>
+  <header>
+    <div class="header-title">
+      <h1>DEPO CENTRAL FARMASI</h1>
+      <p>RSUD Sultan Suriansyah Banjarmasin</p>
     </div>
-
-    <div class="flex items-center gap-1.5 shrink-0">
-      <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-      <span id="modeBadge" class="text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700">
-        PASIEN
-      </span>
-      <button id="btnQr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-        QR
-      </button>
-      <button id="btnLogout" onclick="logoutStaff()" class="hidden bg-rose-600 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-        Keluar
-      </button>
+    <div class="header-right">
+      <div id="clock">00:00:00</div>
+      <button id="btnToggleMode" class="btn-mode" onclick="handleModeButton()">🔒 Mode Petugas</button>
     </div>
   </header>
 
   <!-- MAIN CONTENT -->
-  <main class="flex-1 flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-2.5 min-h-0">
-    <!-- BAGIAN 1: ANTRIAN UTAMA (DINAMIS MENYESUAIKAN JUMLAH BARIS RACIKAN) -->
-    <section id="secUtama" class="smooth-box flex-[1.55] grid grid-cols-3 gap-2 sm:gap-2.5 min-h-0">
-      <div class="bg-white rounded-2xl border-[3px] border-sky-500 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          UMUM (A)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valA" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            A0
-          </div>
-        </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('A', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('A', 1)" class="col-span-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+  <main>
+    <!-- BARIS 1: NOMOR ANTRIAN UTAMA -->
+    <section class="top-queues">
+      <!-- UMUM (A) -->
+      <div class="queue-card umum">
+        <div class="queue-label">Antrian Umum (A)</div>
+        <div class="queue-number" id="dispA">A-0</div>
+        <div class="staff-controls">
+          <button class="btn-ctrl btn-prev" onclick="ubahNomor('A', -1)">-1</button>
+          <button class="btn-ctrl btn-next" onclick="ubahNomor('A', 1)">+1 Panggil</button>
+          <button class="btn-ctrl btn-call" onclick="panggilUlang('A')">🔊 Ulang</button>
+          <button class="btn-ctrl btn-set" onclick="setManualNomor('A')">✏️ Set</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border-[3px] border-emerald-600 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-emerald-700 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          BPJS (B)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valB" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            B0
-          </div>
-        </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('B', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('B', 1)" class="col-span-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+      <!-- BPJS (B) -->
+      <div class="queue-card bpjs">
+        <div class="queue-label">Antrian BPJS (B)</div>
+        <div class="queue-number" id="dispB">B-0</div>
+        <div class="staff-controls">
+          <button class="btn-ctrl btn-prev" onclick="ubahNomor('B', -1)">-1</button>
+          <button class="btn-ctrl btn-next" onclick="ubahNomor('B', 1)">+1 Panggil</button>
+          <button class="btn-ctrl btn-call" onclick="panggilUlang('B')">🔊 Ulang</button>
+          <button class="btn-ctrl btn-set" onclick="setManualNomor('B')">✏️ Set</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border-[3px] border-amber-500 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-amber-500 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          PRIORITAS (C)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valC" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            C0
-          </div>
-        </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('C', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('C', 1)" class="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+      <!-- PRIORITAS (C) -->
+      <div class="queue-card prioritas">
+        <div class="queue-label">Antrian Prioritas (C)</div>
+        <div class="queue-number" id="dispC">C-0</div>
+        <div class="staff-controls">
+          <button class="btn-ctrl btn-prev" onclick="ubahNomor('C', -1)">-1</button>
+          <button class="btn-ctrl btn-next" onclick="ubahNomor('C', 1)">+1 Panggil</button>
+          <button class="btn-ctrl btn-call" onclick="panggilUlang('C')">🔊 Ulang</button>
+          <button class="btn-ctrl btn-set" onclick="setManualNomor('C')">✏️ Set</button>
         </div>
       </div>
     </section>
 
-    <!-- BAGIAN 2: OBAT SEDANG DIRACIK (DINAMIS MEMBESAR SAAT ITEM BERTAMBAH) -->
-    <section id="secDiracik" class="smooth-box flex-[0.85] bg-white rounded-2xl border-2 border-indigo-600 p-2 sm:p-2.5 flex flex-col min-h-0 shadow-sm">
-      <div class="w-full bg-indigo-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1.5 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          OBAT SEDANG DIRACIK
-        </h2>
-        <button onclick="undoLast('diracik')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+    <!-- BARIS 2: STATUS OBAT -->
+    <section class="status-sections">
+      <!-- SEDANG DIRACIK -->
+      <div class="status-box box-racik">
+        <div class="status-header">
+          <span>🧪 Sedang Diracik</span>
+        </div>
+        <div class="staff-add-form">
+          <input type="text" id="inputRacik" placeholder="Contoh: A-12" onkeypress="if(event.key==='Enter') tambahItem('sedangDiracik', 'inputRacik')" />
+          <button onclick="tambahItem('sedangDiracik', 'inputRacik')">Tambah</button>
+        </div>
+        <div class="badge-list" id="listSedangDiracik"></div>
       </div>
-      <form onsubmit="handleAddItems(event, 'diracik')" class="staff-only hidden flex gap-1.5 mb-1.5 shrink-0">
-        <input id="inputDiracik" type="text" placeholder="Ketik nomor (cth: A12, C3, B5)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
-      </form>
-      <div id="listDiracik" class="scroll-area-y flex-1 flex flex-wrap content-start gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic my-auto">Belum ada antrian diracik</p>
+
+      <!-- KONFIRMASI -->
+      <div class="status-box box-konfirm">
+        <div class="status-header">
+          <span>⚠️ Konfirmasi Resep</span>
+        </div>
+        <div class="staff-add-form">
+          <input type="text" id="inputKonfirm" placeholder="Contoh: B-05" onkeypress="if(event.key==='Enter') tambahItem('konfirmasi', 'inputKonfirm')" />
+          <button onclick="tambahItem('konfirmasi', 'inputKonfirm')">Tambah</button>
+        </div>
+        <div class="badge-list" id="listKonfirmasi"></div>
+      </div>
+
+      <!-- TIDAK DAPAT OBAT -->
+      <div class="status-box box-kosong">
+        <div class="status-header">
+          <span>❌ Tidak Dapat Obat</span>
+        </div>
+        <div class="staff-add-form">
+          <input type="text" id="inputKosong" placeholder="Contoh: C-03" onkeypress="if(event.key==='Enter') tambahItem('tidakDapatObat', 'inputKosong')" />
+          <button onclick="tambahItem('tidakDapatObat', 'inputKosong')">Tambah</button>
+        </div>
+        <div class="badge-list" id="listTidakDapatObat"></div>
       </div>
     </section>
 
-    <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI (1 BARIS) -->
-    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-rose-600 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
-      <div class="w-full bg-rose-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          OBAT SEDANG DIKONFIRMASI
-        </h2>
-        <button onclick="undoLast('konfirmasi')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
-      </div>
-      <form onsubmit="handleAddItems(event, 'konfirmasi')" class="staff-only hidden flex gap-1.5 mb-1 shrink-0">
-        <input id="inputKonfirmasi" type="text" placeholder="Ketik nomor (cth: A10, C2, B8)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
-      </form>
-      <div id="listKonfirmasi" class="scroll-area-x flex-1 flex flex-nowrap items-center gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic">Belum ada antrian dikonfirmasi</p>
-      </div>
-    </section>
+    <!-- PANEL RESET & UNDO (HANYA MUNCUL DI MODE PETUGAS) -->
+    <section id="staffResetPanel">
+      <button class="btn-reset-all" onclick="konfirmasiResetSemua()">
+        🔄 RESET SEMUA ANTRIAN KEMBALI KE 0
+      </button>
 
-    <!-- BAGIAN 4: TIDAK DAPAT OBAT (1 BARIS) -->
-    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-purple-700 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
-      <div class="w-full bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          TIDAK DAPAT OBAT
-        </h2>
-        <button onclick="undoLast('tidakDapat')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
+      <div id="areaUndoReset">
+        <p style="color: #facc15; font-size: 13px; margin-bottom: 8px;">
+          Semua data baru saja di-reset ke 0. Salah pencet?
+        </p>
+        <button class="btn-undo-all" onclick="undoResetSemua()">
+          ↩️ UNDO / KEMBALIKAN DATA SEBELUMNYA
         </button>
-      </div>
-      <form onsubmit="handleAddItems(event, 'tidakDapat')" class="staff-only hidden flex gap-1.5 mb-1 shrink-0">
-        <input id="inputTidakDapat" type="text" placeholder="Ketik nomor (cth: A4, C1, B9)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
-      </form>
-      <div id="listTidakDapat" class="scroll-area-x flex-1 flex flex-nowrap items-center gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic">Belum ada antrian tidak dapat obat</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL LOGIN PETUGAS -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200">
-      <h3 class="text-base font-extrabold text-emerald-900 text-center">Login Petugas Farmasi</h3>
-      <p class="text-xs text-slate-500 text-center mt-0.5 mb-4">Depo Central Farmasi</p>
-      <form onsubmit="submitLogin(event)" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
-          <input id="loginUser" type="text" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan username" />
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-          <input id="loginPass" type="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan password" />
-        </div>
-        <p id="loginErr" class="hidden text-xs font-semibold text-rose-600 text-center">Username atau password salah!</p>
-        <div class="flex gap-2 pt-1">
-          <button type="button" onclick="closeLoginModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg">Batal</button>
-          <button type="submit" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2.5 rounded-lg">Masuk</button>
-        </div>
-      </form>
+  <!-- FOOTER -->
+  <footer>
+    <div class="qr-section">
+      <div id="qrcode"></div>
+      <div class="qr-text">
+        <strong>Pantau Antrian dari HP Anda!</strong><br />
+        Scan QR Code ini untuk memantau status resep dari ruang tunggu atau area sekitar rumah sakit.
+      </div>
     </div>
-  </div>
+    <div style="font-size: 12px; color: #94a3b8;">
+      *Ketuk nomor pada daftar di Mode Petugas untuk menghapus jika sudah selesai.
+    </div>
+  </footer>
 
-  <!-- MODAL QR CODE -->
-  <div id="qrModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200 flex flex-col items-center text-center">
-      <h3 class="text-sm font-extrabold text-emerald-900">QR Code Antrian Pasien</h3>
-      <p class="text-[11px] text-slate-500 mt-0.5 mb-3">Scan untuk memantau antrian obat secara real-time</p>
-      <div id="qrcodeBox" class="p-3 bg-white border-2 border-emerald-800 rounded-xl flex items-center justify-center"></div>
-      <p id="qrUrlText" class="text-[10px] text-slate-500 break-all mt-2.5 mb-3 px-1"></p>
-      <div class="flex gap-2 w-full">
-        <button onclick="window.print()" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2 rounded-lg">Cetak</button>
-        <button onclick="closeQrModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-lg">Tutup</button>
+  <!-- MODAL LOGIN PETUGAS -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal-box">
+      <h3>Login Petugas Farmasi</h3>
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="off" />
+      <input type="password" id="loginPass" placeholder="Password" onkeypress="if(event.key==='Enter') prosesLogin()" />
+      <div class="modal-actions">
+        <button style="background:#64748b; color:#fff;" onclick="tutupLogin()">Batal</button>
+        <button style="background:#4ade80; color:#0b132b;" onclick="prosesLogin()">Masuk</button>
       </div>
     </div>
   </div>
 
-  <!-- SCRIPT UTAMA -->
   <script>
-    const DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/queue_state.json";
-    let state = { A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
-    let historyStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
-    let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
+    // ==========================================
+    // 1. KONFIGURASI FIREBASE PROYEK 1
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyAjKG_xl85M0n_VpnyRGNiWtdkTVWs7MUU",
+      databaseURL: "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "antrianobatfarmasirsss"
+    };
 
-    function updateWitaClock() {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // State Lokal
+    let isStaff = false;
+    let currentData = {
+      antrianA: 0,
+      antrianB: 0,
+      antrianC: 0,
+      sedangDiracik: {},
+      konfirmasi: {},
+      tidakDapatObat: {}
+    };
+    let backupDataSebelumReset = null;
+    let initialLoad = true;
+
+    // ==========================================
+    // 2. JAM REAL-TIME & QR CODE
+    // ==========================================
+    function updateClock() {
       const now = new Date();
-      const dateStr = now.toLocaleDateString("id-ID", { timeZone: "Asia/Makassar", day: "2-digit", month: "short", year: "numeric" });
-      const timeStr = now.toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).replace(/\./g, ":");
-      document.getElementById("witaClock").textContent = dateStr + " • " + timeStr + " WITA";
+      document.getElementById('clock').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
     }
-    updateWitaClock();
-    setInterval(updateWitaClock, 1000);
+    setInterval(updateClock, 1000);
+    updateClock();
 
-    let tapCount = 0;
-    let tapTimer = null;
-    document.getElementById("secretTrigger").addEventListener("click", function() {
-      if (isStaff) return;
-      tapCount++;
-      clearTimeout(tapTimer);
-      if (tapCount >= 5) {
-        tapCount = 0;
-        document.getElementById("loginErr").classList.add("hidden");
-        document.getElementById("loginUser").value = "";
-        document.getElementById("loginPass").value = "";
-        document.getElementById("loginModal").classList.remove("hidden");
-      } else {
-        tapTimer = setTimeout(function() { tapCount = 0; }, 2000);
-      }
+    new QRCode(document.getElementById("qrcode"), {
+      text: window.location.href,
+      width: 64,
+      height: 64
     });
 
-    function closeLoginModal() { document.getElementById("loginModal").classList.add("hidden"); }
+    // ==========================================
+    // 3. SINKRONISASI REAL-TIME FIREBASE
+    // ==========================================
+    db.ref().on('value', (snapshot) => {
+      const val = snapshot.val() || {};
 
-    function submitLogin(e) {
-      e.preventDefault();
-      const u = document.getElementById("loginUser").value.trim();
-      const p = document.getElementById("loginPass").value.trim();
-      if (u === "Farmasi" && p === "123321") {
-        isStaff = true;
-        localStorage.setItem("rsss_farmasi_staff", "true");
-        closeLoginModal();
-        renderUI();
-      } else {
-        document.getElementById("loginErr").classList.remove("hidden");
+      const newA = Number(val.antrianA || 0);
+      const newB = Number(val.antrianB || 0);
+      const newC = Number(val.antrianC || 0);
+
+      // Bunyikan suara panggilan jika ada kenaikan nomor (bukan saat baru buka halaman & bukan saat reset ke 0)
+      if (!initialLoad) {
+        if (newA > currentData.antrianA && newA > 0) panggilSuara('A', newA);
+        if (newB > currentData.antrianB && newB > 0) panggilSuara('B', newB);
+        if (newC > currentData.antrianC && newC > 0) panggilSuara('C', newC);
       }
-    }
 
-    function logoutStaff() {
-      isStaff = false;
-      localStorage.removeItem("rsss_farmasi_staff");
-      renderUI();
-    }
+      currentData = {
+        antrianA: newA,
+        antrianB: newB,
+        antrianC: newC,
+        sedangDiracik: val.sedangDiracik || {},
+        konfirmasi: val.konfirmasi || {},
+        tidakDapatObat: val.tidakDapatObat || {}
+      };
 
-    function sortQueueTokens(list) {
-      const order = { A: 1, C: 2, B: 3 };
-      return Array.from(new Set(list)).sort(function(a, b) {
-        const mA = a.match(/^([ACB])(\d+)(.*)$/i);
-        const mB = b.match(/^([ACB])(\d+)(.*)$/i);
-        const rA = mA ? (order[mA[1].toUpperCase()] || 99) : 99;
-        const rB = mB ? (order[mB[1].toUpperCase()] || 99) : 99;
-        if (rA !== rB) return rA - rB;
-        const nA = mA ? parseInt(mA[2], 10) : 999999;
-        const nB = mB ? parseInt(mB[2], 10) : 999999;
-        if (nA !== nB) return nA - nB;
-        return a.localeCompare(b, "id", { numeric: true });
+      // Update Tampilan Angka Utama
+      document.getElementById('dispA').textContent = `A-${newA}`;
+      document.getElementById('dispB').textContent = `B-${newB}`;
+      document.getElementById('dispC').textContent = `C-${newC}`;
+
+      // Render Daftar Status
+      renderList('listSedangDiracik', 'sedangDiracik', currentData.sedangDiracik);
+      renderList('listKonfirmasi', 'konfirmasi', currentData.konfirmasi);
+      renderList('listTidakDapatObat', 'tidakDapatObat', currentData.tidakDapatObat);
+
+      initialLoad = false;
+    });
+
+    function renderList(elementId, nodeName, itemsObj) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+
+      Object.keys(itemsObj).forEach((key) => {
+        const badge = document.createElement('div');
+        badge.className = 'queue-badge';
+        badge.textContent = itemsObj[key];
+
+        // Tap untuk hapus jika dalam Mode Petugas
+        badge.onclick = () => {
+          if (isStaff) {
+            if (confirm(`Hapus nomor ${itemsObj[key]} dari daftar?`)) {
+              db.ref(`${nodeName}/${key}`).remove();
+            }
+          }
+        };
+
+        container.appendChild(badge);
       });
     }
 
-    function getBadgeColor(token) {
-      const f = token.charAt(0).toUpperCase();
-      if (f === "A") return "bg-sky-50 text-sky-900 border-sky-500";
-      if (f === "B") return "bg-emerald-50 text-emerald-900 border-emerald-600";
-      if (f === "C") return "bg-amber-50 text-amber-900 border-amber-500";
-      return "bg-slate-100 text-slate-800 border-slate-400";
+    // ==========================================
+    // 4. KONTROL ANTRIAN & SUARA PANGGILAN
+    // ==========================================
+    function ubahNomor(kode, delta) {
+      if (!isStaff) return;
+      const field = `antrian${kode}`;
+      const nextVal = Math.max(0, (currentData[field] || 0) + delta);
+      db.ref(field).set(nextVal);
     }
 
-    // PENYESUAIAN PROPORSI OTOMATIS ABC BERDASARKAN JUMLAH BARIS RACIKAN
-    function adjustDynamicLayout() {
-      const secUtama = document.getElementById("secUtama");
-      const secDiracik = document.getElementById("secDiracik");
-      const listDiracik = document.getElementById("listDiracik");
-      const nums = [document.getElementById("valA"), document.getElementById("valB"), document.getElementById("valC")];
-
-      if (isStaff) {
-        secUtama.style.flex = "0.95";
-        secDiracik.style.flex = "1.45";
-        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
-        return;
-      }
-
-      const badges = listDiracik.querySelectorAll("span");
-      let rowCount = 1;
-      if (badges.length > 0) {
-        const tops = new Set();
-        badges.forEach(b => tops.add(Math.round(b.offsetTop / 12)));
-        rowCount = tops.size;
-      }
-
-      if (rowCount <= 1) {
-        // 0 - 1 baris racikan: ABC di atas tampil sangat besar & dominan
-        secUtama.style.flex = "1.55";
-        secDiracik.style.flex = "0.85";
-        nums.forEach(n => { n.className = "smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none"; });
-      } else if (rowCount === 2) {
-        // 2 baris racikan: ABC mengecil sedikit agar 2 baris racikan lega
-        secUtama.style.flex = "1.1";
-        secDiracik.style.flex = "1.3";
-        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none"; });
-      } else {
-        // 3+ baris racikan: ABC meramping agar 3 baris racikan muat penuh 1 layar
-        secUtama.style.flex = "0.75";
-        secDiracik.style.flex = "1.65";
-        nums.forEach(n => { n.className = "smooth-num text-3xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
+    function setManualNomor(kode) {
+      if (!isStaff) return;
+      const input = prompt(`Masukkan nomor antrian ${kode} saat ini:`, currentData[`antrian${kode}`]);
+      if (input !== null && !isNaN(input) && input.trim() !== '') {
+        db.ref(`antrian${kode}`).set(Math.max(0, parseInt(input, 10)));
       }
     }
 
-    function renderUI() {
-      document.getElementById("valA").textContent = "A" + (state.A || 0);
-      document.getElementById("valB").textContent = "B" + (state.B || 0);
-      document.getElementById("valC").textContent = "C" + (state.C || 0);
-      renderList("listDiracik", state.diracik || [], "diracik", "Belum ada antrian diracik");
-      renderList("listKonfirmasi", state.konfirmasi || [], "konfirmasi", "Belum ada antrian dikonfirmasi");
-      renderList("listTidakDapat", state.tidakDapat || [], "tidakDapat", "Belum ada antrian tidak dapat obat");
-
-      document.querySelectorAll(".staff-only").forEach(function(el) {
-        el.classList.toggle("hidden", !isStaff);
-      });
-
-      const badge = document.getElementById("modeBadge");
-      const btnQr = document.getElementById("btnQr");
-      const btnLogout = document.getElementById("btnLogout");
-      if (isStaff) {
-        badge.textContent = "PETUGAS";
-        badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900";
-        btnQr.classList.remove("hidden");
-        btnLogout.classList.remove("hidden");
-      } else {
-        badge.textContent = "PASIEN";
-        badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700";
-        btnQr.classList.add("hidden");
-        btnLogout.classList.add("hidden");
-      }
-
-      requestAnimationFrame(adjustDynamicLayout);
+    function panggilUlang(kode) {
+      const angka = currentData[`antrian${kode}`] || 0;
+      if (angka > 0) panggilSuara(kode, angka);
     }
 
-    function renderList(id, items, key, emptyMsg) {
-      const box = document.getElementById(id);
-      const sorted = sortQueueTokens(items);
-      if (sorted.length === 0) {
-        box.innerHTML = '<p class="w-full text-center text-xs sm:text-sm text-slate-400 italic my-auto">' + emptyMsg + '</p>';
-        return;
-      }
-      box.innerHTML = sorted.map(function(t) {
-        const cls = getBadgeColor(t);
-        if (isStaff) {
-          return '<button onclick="removeToken(\'' + key + '\', \'' + t.replace(/'/g, "\\'") + '\')" class="' + cls + ' shrink-0 border-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl font-black text-base sm:text-xl lg:text-2xl flex items-center gap-2 shadow-2xs active:scale-95"><span>' + t + '</span><span class="text-xs sm:text-sm opacity-60">✕</span></button>';
-        }
-        return '<span class="' + cls + ' shrink-0 border-2 px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-xl font-black text-lg sm:text-2xl lg:text-3xl shadow-2xs">' + t + '</span>';
-      }).join("");
-    }
-
-    let isSaving = false;
-    async function syncFromFirebase() {
-      if (isSaving) return;
-      try {
-        const res = await fetch(DB_URL + "?t=" + Date.now());
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
-        if (data) {
-          state.A = Number(data.A) || 0;
-          state.B = Number(data.B) || 0;
-          state.C = Number(data.C) || 0;
-          state.diracik = Array.isArray(data.diracik) ? data.diracik : [];
-          state.konfirmasi = Array.isArray(data.konfirmasi) ? data.konfirmasi : [];
-          state.tidakDapat = Array.isArray(data.tidakDapat) ? data.tidakDapat : [];
-        }
-        renderUI();
-      } catch (e) {
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-amber-400 inline-block";
+    function panggilSuara(kode, angka) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const teks = `Nomor antrian, ${kode}, ${angka}, silakan menuju loket penyerahan obat.`;
+        const utterance = new SpeechSynthesisUtterance(teks);
+        utterance.lang = 'id-ID';
+        utterance.rate = 0.92;
+        window.speechSynthesis.speak(utterance);
       }
     }
 
-    async function saveToFirebase() {
-      isSaving = true;
-      try {
-        await fetch(DB_URL, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            A: state.A || 0,
-            B: state.B || 0,
-            C: state.C || 0,
-            diracik: sortQueueTokens(state.diracik || []),
-            konfirmasi: sortQueueTokens(state.konfirmasi || []),
-            tidakDapat: sortQueueTokens(state.tidakDapat || [])
-          })
+    function tambahItem(nodeName, inputId) {
+      if (!isStaff) return;
+      const inputEl = document.getElementById(inputId);
+      const val = inputEl.value.trim().toUpperCase();
+      if (!val) return;
+
+      db.ref(nodeName).push(val);
+      inputEl.value = '';
+    }
+
+    // ==========================================
+    // 5. FITUR RESET SEMUA & UNDO RESET
+    // ==========================================
+    function konfirmasiResetSemua() {
+      if (!isStaff) return;
+      const yakin = confirm("apa anda yakin ingin reset semua tampilan no antrian kembali k 0 ?");
+      if (yakin) {
+        eksekusiResetSemua();
+      }
+    }
+
+    function eksekusiResetSemua() {
+      // Simpan salinan data saat ini sebelum dihapus untuk fitur Undo
+      backupDataSebelumReset = JSON.parse(JSON.stringify(currentData));
+
+      const dataKosong = {
+        antrianA: 0,
+        antrianB: 0,
+        antrianC: 0,
+        sedangDiracik: null,
+        konfirmasi: null,
+        tidakDapatObat: null
+      };
+
+      db.ref().update(dataKosong)
+        .then(() => {
+          document.getElementById('areaUndoReset').style.display = 'block';
+          alert("✅ Semua nomor antrian dan daftar racikan berhasil di-reset ke 0.");
+        })
+        .catch((err) => {
+          alert("❌ Gagal mereset data: " + err.message);
         });
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
-      } catch (e) {}
-      isSaving = false;
     }
 
-    function stepCounter(type, delta) {
-      if (!isStaff) return;
-      state[type] = Math.max(0, (Number(state[type]) || 0) + delta);
-      renderUI();
-      saveToFirebase();
-    }
-
-    function handleAddItems(e, key) {
-      e.preventDefault();
-      if (!isStaff) return;
-      const inputMap = { diracik: "inputDiracik", konfirmasi: "inputKonfirmasi", tidakDapat: "inputTidakDapat" };
-      const inp = document.getElementById(inputMap[key]);
-      const raw = inp.value.trim().toUpperCase();
-      if (!raw) return;
-      const tokens = raw.split(/[\s,;]+/).filter(Boolean);
-      if (tokens.length === 0) return;
-      historyStack[key].push([...(state[key] || [])]);
-      state[key] = sortQueueTokens([...(state[key] || []), ...tokens]);
-      inp.value = "";
-      renderUI();
-      saveToFirebase();
-    }
-
-    function removeToken(key, token) {
-      if (!isStaff) return;
-      historyStack[key].push([...(state[key] || [])]);
-      state[key] = (state[key] || []).filter(function(i) { return i !== token; });
-      renderUI();
-      saveToFirebase();
-    }
-
-    function undoLast(key) {
-      if (!isStaff || historyStack[key].length === 0) return;
-      state[key] = historyStack[key].pop();
-      renderUI();
-      saveToFirebase();
-    }
-
-    let qrGenerated = false;
-    function openQrModal() {
-      const url = window.location.href.split("#")[0].split("?")[0];
-      document.getElementById("qrUrlText").textContent = url;
-      if (!qrGenerated && typeof QRCode !== "undefined") {
-        document.getElementById("qrcodeBox").innerHTML = "";
-        new QRCode(document.getElementById("qrcodeBox"), { text: url, width: 190, height: 190, colorDark: "#064e3b", colorLight: "#ffffff" });
-        qrGenerated = true;
+    function undoResetSemua() {
+      if (!isStaff || !backupDataSebelumReset) {
+        alert("Tidak ada data cadangan untuk dikembalikan.");
+        return;
       }
-      document.getElementById("qrModal").classList.remove("hidden");
+
+      const yakinUndo = confirm("Kembalikan semua data antrian dan daftar racikan seperti sebelum di-reset?");
+      if (yakinUndo) {
+        db.ref().update(backupDataSebelumReset)
+          .then(() => {
+            backupDataSebelumReset = null;
+            document.getElementById('areaUndoReset').style.display = 'none';
+            alert("✅ Data berhasil dikembalikan seperti semula!");
+          })
+          .catch((err) => {
+            alert("❌ Gagal mengembalikan data: " + err.message);
+          });
+      }
     }
 
-    function closeQrModal() { document.getElementById("qrModal").classList.add("hidden"); }
+    // ==========================================
+    // 6. LOGIN & LOGOUT MODE PETUGAS
+    // ==========================================
+    function handleModeButton() {
+      if (isStaff) {
+        isStaff = false;
+        document.body.classList.remove('staff-mode');
+        document.getElementById('btnToggleMode').textContent = '🔒 Mode Petugas';
+      } else {
+        document.getElementById('loginModal').style.display = 'flex';
+        document.getElementById('loginUser').focus();
+      }
+    }
 
-    window.addEventListener("resize", adjustDynamicLayout);
-    renderUI();
-    syncFromFirebase();
-    setInterval(syncFromFirebase, 2500);
+    function tutupLogin() {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+    }
+
+    function prosesLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value;
+
+      if (user === 'Farmasi' && pass === '123321') {
+        isStaff = true;
+        document.body.classList.add('staff-mode');
+        document.getElementById('btnToggleMode').textContent = '🔓 Keluar Mode Petugas';
+        tutupLogin();
+      } else {
+        alert('Username atau Password salah!');
+      }
+    }
   </script>
 </body>
 </html>
