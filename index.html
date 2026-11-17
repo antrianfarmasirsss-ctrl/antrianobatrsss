@@ -4,211 +4,587 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Antrian Farmasi RSUD Sultan Suriansyah Banjarmasin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     html, body {
-      margin: 0; padding: 0; height: 100dvh; overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f1f5f9; user-select: none;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      height: 100vh;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      user-select: none;
     }
-    input { user-select: text; }
-    .scroll-area-y { overflow-y: auto; scrollbar-width: thin; }
-    .scroll-area-x { overflow-x: auto; scrollbar-width: thin; }
+    body {
+      display: flex;
+      flex-direction: column;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    input { user-select: text; outline: none; }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    button:active { transform: scale(0.95); }
+    .hidden { display: none !important; }
+
+    /* HEADER */
+    .app-header {
+      background-color: #064e3b;
+      color: #ffffff;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+      flex-shrink: 0;
+    }
+    .header-left { padding-right: 8px; cursor: pointer; }
+    .header-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    .header-sub {
+      display: flex;
+      align-items: center;
+      font-size: 11px;
+      color: #a7f3d0;
+      margin-top: 2px;
+    }
+    .header-sub span { margin-right: 6px; }
+    .header-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-shrink: 0;
+    }
+
+    /* QR WIDGET HEADER */
+    .qr-widget {
+      cursor: pointer;
+      background-color: #ffffff;
+      color: #022c22;
+      border-radius: 12px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      border: 1px solid #a7f3d0;
+      margin-right: 8px;
+    }
+    .qr-box-mini {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .qr-text-wrap {
+      display: none;
+      flex-direction: column;
+      line-height: 1.15;
+      margin-left: 8px;
+    }
+    .qr-lbl-1 { font-size: 9px; font-weight: 800; text-transform: uppercase; color: #047857; }
+    .qr-lbl-2 { font-size: 11px; font-weight: 900; color: #0f172a; }
+    .qr-lbl-3 { font-size: 10px; font-weight: 700; color: #065f46; }
+
+    /* STATUS & TOMBOL PETUGAS */
+    .status-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .status-controls > * { margin-left: 6px; }
+    .conn-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #fbbf24;
+      display: inline-block;
+    }
+    .conn-dot.online { background-color: #34d399; }
+    .conn-dot.offline { background-color: #fbbf24; }
+    .badge-mode {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background-color: #065f46;
+      color: #d1fae5;
+      border: 1px solid #047857;
+    }
+    .badge-mode.staff {
+      background-color: #fbbf24;
+      color: #0f172a;
+      border-color: #f59e0b;
+    }
+    .btn-top {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    .btn-undo-reset { background-color: #fbbf24; color: #0f172a; font-weight: 800; }
+    .btn-reset { background-color: #dc2626; color: #ffffff; }
+    .btn-qr { background-color: #ffffff; color: #064e3b; }
+    .btn-logout { background-color: #e11d48; color: #ffffff; }
+
+    /* MAIN CONTENT */
+    .main-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px;
+      min-height: 0;
+    }
     .smooth-box { transition: flex 0.35s ease; }
-    .smooth-num { transition: font-size 0.35s ease; }
+
+    /* BAGIAN 1: 3 KOLOM ANTRIAN UTAMA */
+    .sec-utama {
+      flex: 1.55;
+      display: flex;
+      flex-direction: row;
+      min-height: 0;
+      margin-bottom: 8px;
+    }
+    .card-utama {
+      flex: 1;
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      min-height: 0;
+      min-width: 0;
+    }
+    .card-utama:nth-child(2) { margin: 0 8px; }
+    .border-sky { border: 3px solid #0ea5e9; }
+    .border-emerald { border: 3px solid #059669; }
+    .border-amber { border: 3px solid #f59e0b; }
+
+    .card-tag {
+      width: 100%;
+      text-align: center;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 4px;
+      border-radius: 8px;
+      letter-spacing: 0.03em;
+      flex-shrink: 0;
+    }
+    .bg-sky { background-color: #0284c7; }
+    .bg-emerald { background-color: #047857; }
+    .bg-amber { background-color: #f59e0b; }
+
+    .num-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 0;
+    }
+    .smooth-num {
+      font-weight: 900;
+      color: #1e293b;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      transition: font-size 0.35s ease;
+    }
+    .num-lg { font-size: 48px; }
+    .num-md { font-size: 38px; }
+    .num-sm { font-size: 30px; }
+
+    /* TOMBOL -1 & NEXT PETUGAS */
+    .staff-counter-row {
+      width: 100%;
+      display: flex;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    .btn-min {
+      flex: 1;
+      background-color: #e2e8f0;
+      color: #334155;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 0;
+      border-radius: 8px;
+      margin-right: 4px;
+    }
+    .btn-next {
+      flex: 2;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 5px 0;
+      border-radius: 8px;
+    }
+
+    /* BAGIAN 2, 3, 4: PANEL DAFTAR NOMOR */
+    .sec-panel {
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .sec-diracik { flex: 0.85; border: 2px solid #4f46e5; margin-bottom: 8px; }
+    .sec-konfirmasi { flex: 0.6; border: 2px solid #e11d48; margin-bottom: 8px; justify-content: space-between; }
+    .sec-tidak { flex: 0.6; border: 2px solid #7e22ce; justify-content: space-between; }
+
+    .panel-bar {
+      width: 100%;
+      color: #ffffff;
+      padding: 4px 12px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+    .bg-indigo { background-color: #4f46e5; }
+    .bg-rose { background-color: #e11d48; }
+    .bg-purple { background-color: #7e22ce; }
+
+    .panel-title {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .btn-undo-mini {
+      background-color: rgba(255,255,255,0.2);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.45);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 5px;
+    }
+
+    .form-add {
+      display: flex;
+      margin-bottom: 6px;
+      flex-shrink: 0;
+    }
+    .input-add {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-right: 6px;
+      min-width: 0;
+    }
+    .btn-add {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 5px 12px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    /* LIST CONTAINER */
+    .list-wrap-y {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      overflow-y: auto;
+      min-height: 0;
+    }
+    .list-wrap-x {
+      flex: 1;
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      overflow-x: auto;
+      min-height: 0;
+    }
+    .empty-msg {
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+      margin: auto 0;
+    }
+
+    /* BADGE NOMOR ANTRIAN */
+    .token-badge {
+      flex-shrink: 0;
+      border-width: 2px;
+      border-style: solid;
+      padding: 4px 14px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 18px;
+      margin: 3px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .token-btn {
+      flex-shrink: 0;
+      border-width: 2px;
+      border-style: solid;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 16px;
+      margin: 3px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .token-x { font-size: 12px; opacity: 0.6; margin-left: 8px; }
+    .tok-a { background-color: #f0f9ff; color: #0c4a6e; border-color: #0ea5e9; }
+    .tok-b { background-color: #ecfdf5; color: #064e3b; border-color: #059669; }
+    .tok-c { background-color: #fffbeb; color: #78350f; border-color: #f59e0b; }
+    .tok-def { background-color: #f1f5f9; color: #1e293b; border-color: #94a3b8; }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(15, 23, 42, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 320px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+      border: 1px solid #e2e8f0;
+    }
+    .modal-title { margin: 0; font-size: 16px; font-weight: 800; color: #064e3b; text-align: center; }
+    .modal-sub { margin: 4px 0 14px 0; font-size: 12px; color: #64748b; text-align: center; }
+    .form-group { margin-bottom: 12px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+    .form-input { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+    .login-err { font-size: 12px; font-weight: 600; color: #e11d48; text-align: center; margin: 0 0 10px 0; }
+    .modal-actions { display: flex; margin-top: 8px; }
+    .btn-modal-cancel { flex: 1; background-color: #e2e8f0; color: #334155; font-weight: 700; font-size: 12px; padding: 10px; border-radius: 8px; margin-right: 8px; }
+    .btn-modal-ok { flex: 1; background-color: #065f46; color: #ffffff; font-weight: 700; font-size: 12px; padding: 10px; border-radius: 8px; }
+    .qr-big-box { padding: 12px; background-color: #ffffff; border: 2px solid #065f46; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
+    .qr-url-lbl { font-size: 12px; font-weight: 800; color: #064e3b; word-break: break-all; margin: 10px 0 12px 0; }
+
+    /* RESPONSIF TABLET / TV / KOMPUTER (>= 640px) */
+    @media (min-width: 640px) {
+      .app-header { padding: 10px 20px; }
+      .header-title { font-size: 18px; }
+      .header-sub { font-size: 13px; }
+      .qr-box-mini { width: 48px; height: 48px; }
+      .qr-text-wrap { display: flex; }
+      .badge-mode { font-size: 12px; }
+      .main-wrap { padding: 10px; }
+      .sec-utama { margin-bottom: 10px; }
+      .card-utama { padding: 10px; }
+      .card-utama:nth-child(2) { margin: 0 10px; }
+      .card-tag { font-size: 13px; padding: 4px; }
+      .num-lg { font-size: 72px; }
+      .num-md { font-size: 56px; }
+      .num-sm { font-size: 46px; }
+      .sec-panel { padding: 10px; }
+      .sec-diracik, .sec-konfirmasi { margin-bottom: 10px; }
+      .panel-title { font-size: 14px; }
+      .input-add, .btn-add { font-size: 14px; }
+      .empty-msg { font-size: 14px; }
+      .token-badge { font-size: 24px; padding: 6px 20px; margin: 4px; }
+      .token-btn { font-size: 20px; padding: 5px 16px; margin: 4px; }
+    }
+
+    /* RESPONSIF LAYAR BESAR / SMART TV (>= 1024px) */
+    @media (min-width: 1024px) {
+      .header-title { font-size: 22px; }
+      .header-sub { font-size: 14px; }
+      .card-tag { font-size: 15px; }
+      .num-lg { font-size: 96px; }
+      .num-md { font-size: 72px; }
+      .num-sm { font-size: 58px; }
+      .panel-title { font-size: 16px; }
+      .token-badge { font-size: 30px; padding: 6px 22px; }
+      .token-btn { font-size: 24px; }
+    }
   </style>
 </head>
-<body class="flex flex-col h-[100dvh] w-full max-w-7xl mx-auto bg-slate-100 text-slate-800">
+<body>
 
   <!-- HEADER -->
-  <header class="bg-emerald-900 text-white px-3 sm:px-5 py-2 flex items-center justify-between shadow-md shrink-0">
-    <div id="secretTrigger" class="cursor-pointer active:opacity-80 pr-2">
-      <h1 class="text-sm sm:text-lg lg:text-xl font-bold leading-tight tracking-tight">
-        Farmasi RSUD Sultan Suriansyah Banjarmasin
-      </h1>
-      <div class="flex items-center gap-1.5 text-[11px] sm:text-xs lg:text-sm text-emerald-200 mt-0.5">
-        <span class="font-medium">Depo Central Farmasi</span>
+  <header class="app-header">
+    <div id="secretTrigger" class="header-left">
+      <h1 class="header-title">Farmasi RSUD Sultan Suriansyah Banjarmasin</h1>
+      <div class="header-sub">
+        <span style="font-weight: 500;">Depo Central Farmasi</span>
         <span>•</span>
         <span id="witaClock">Memuat waktu...</span>
       </div>
     </div>
 
-    <div class="flex items-center gap-2 sm:gap-3 shrink-0 justify-end">
+    <div class="header-right">
       <!-- QR CODE MODE PASIEN -->
-      <div id="patientQrWidget" onclick="openQrModal()" title="Klik untuk memperbesar QR" class="cursor-pointer bg-white text-emerald-950 rounded-xl px-2 py-1 flex items-center gap-2 shadow-sm border border-emerald-200 active:scale-95">
-        <div id="headerQrcodeBox" class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shrink-0"></div>
-        <div class="hidden sm:flex flex-col leading-tight pr-0.5">
-          <span class="text-[9px] font-extrabold uppercase tracking-wider text-emerald-700">Pantau dari HP</span>
-          <span class="text-[11px] font-black text-slate-900">Scan QR / Ketik:</span>
-          <span class="text-[10px] font-bold text-emerald-800">tinyurl.com/antrianfarmasirsss</span>
+      <div id="patientQrWidget" onclick="openQrModal()" title="Klik untuk memperbesar QR" class="qr-widget">
+        <div id="headerQrcodeBox" class="qr-box-mini"></div>
+        <div class="qr-text-wrap">
+          <span class="qr-lbl-1">Pantau dari HP</span>
+          <span class="qr-lbl-2">Scan QR / Ketik:</span>
+          <span class="qr-lbl-3">tinyurl.com/antrianfarmasirsss</span>
         </div>
       </div>
 
       <!-- STATUS & TOMBOL MODE PETUGAS -->
-      <div class="flex items-center gap-1.5 flex-wrap justify-end">
-        <span id="connDot" class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
-        <span id="modeBadge" class="text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700">
-          PASIEN
-        </span>
-        <button id="btnUndoReset" onclick="undoResetAll()" class="hidden bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-          ↩ Undo Reset
-        </button>
-        <button id="btnResetAll" onclick="confirmResetAll()" class="hidden bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-          Reset
-        </button>
-        <button id="btnQr" onclick="openQrModal()" class="hidden bg-white text-emerald-900 font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-          QR
-        </button>
-        <button id="btnLogout" onclick="logoutStaff()" class="hidden bg-rose-600 text-white font-bold text-xs px-2.5 py-1 rounded shadow-sm active:scale-95">
-          Keluar
-        </button>
+      <div class="status-controls">
+        <span id="connDot" class="conn-dot"></span>
+        <span id="modeBadge" class="badge-mode">PASIEN</span>
+        <button id="btnUndoReset" onclick="undoResetAll()" class="hidden btn-top btn-undo-reset">↩ Undo Reset</button>
+        <button id="btnResetAll" onclick="confirmResetAll()" class="hidden btn-top btn-reset">Reset</button>
+        <button id="btnQr" onclick="openQrModal()" class="hidden btn-top btn-qr">QR</button>
+        <button id="btnLogout" onclick="logoutStaff()" class="hidden btn-top btn-logout">Keluar</button>
       </div>
     </div>
   </header>
 
   <!-- MAIN CONTENT -->
-  <main class="flex-1 flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-2.5 min-h-0">
+  <main class="main-wrap">
     <!-- BAGIAN 1: ANTRIAN UTAMA -->
-    <section id="secUtama" class="smooth-box flex-[1.55] grid grid-cols-3 gap-2 sm:gap-2.5 min-h-0">
-      <div class="bg-white rounded-2xl border-[3px] border-sky-500 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-sky-600 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          UMUM (A)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valA" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            A0
-          </div>
+    <section id="secUtama" class="smooth-box sec-utama">
+      <div class="card-utama border-sky">
+        <span class="card-tag bg-sky">UMUM (A)</span>
+        <div class="num-center">
+          <div id="valA" class="smooth-num num-lg">A0</div>
         </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('A', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('A', 1)" class="col-span-2 bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+        <div class="staff-only hidden staff-counter-row">
+          <button onclick="stepCounter('A', -1)" class="btn-min">-1</button>
+          <button onclick="stepCounter('A', 1)" class="btn-next bg-sky">NEXT</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border-[3px] border-emerald-600 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-emerald-700 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          BPJS (B)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valB" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            B0
-          </div>
+      <div class="card-utama border-emerald">
+        <span class="card-tag bg-emerald">BPJS (B)</span>
+        <div class="num-center">
+          <div id="valB" class="smooth-num num-lg">B0</div>
         </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('B', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('B', 1)" class="col-span-2 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+        <div class="staff-only hidden staff-counter-row">
+          <button onclick="stepCounter('B', -1)" class="btn-min">-1</button>
+          <button onclick="stepCounter('B', 1)" class="btn-next bg-emerald">NEXT</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border-[3px] border-amber-500 p-1.5 sm:p-2.5 flex flex-col items-center justify-between shadow-sm min-h-0">
-        <span class="w-full text-center bg-amber-500 text-white text-[10px] sm:text-xs lg:text-sm font-extrabold py-0.5 sm:py-1 rounded-lg tracking-wide shrink-0">
-          PRIORITAS (C)
-        </span>
-        <div class="flex-1 flex items-center justify-center w-full min-h-0">
-          <div id="valC" class="smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none">
-            C0
-          </div>
+      <div class="card-utama border-amber">
+        <span class="card-tag bg-amber">PRIORITAS (C)</span>
+        <div class="num-center">
+          <div id="valC" class="smooth-num num-lg">C0</div>
         </div>
-        <div class="staff-only hidden w-full grid grid-cols-3 gap-1 mt-0.5 shrink-0">
-          <button onclick="stepCounter('C', -1)" class="col-span-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs py-1 rounded-lg active:scale-95">-1</button>
-          <button onclick="stepCounter('C', 1)" class="col-span-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs py-1 rounded-lg shadow-sm active:scale-95">NEXT</button>
+        <div class="staff-only hidden staff-counter-row">
+          <button onclick="stepCounter('C', -1)" class="btn-min">-1</button>
+          <button onclick="stepCounter('C', 1)" class="btn-next bg-amber">NEXT</button>
         </div>
       </div>
     </section>
 
     <!-- BAGIAN 2: OBAT SEDANG DIRACIK -->
-    <section id="secDiracik" class="smooth-box flex-[0.85] bg-white rounded-2xl border-2 border-indigo-600 p-2 sm:p-2.5 flex flex-col min-h-0 shadow-sm">
-      <div class="w-full bg-indigo-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1.5 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          OBAT SEDANG DIRACIK
-        </h2>
-        <button onclick="undoLast('diracik')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+    <section id="secDiracik" class="smooth-box sec-panel sec-diracik">
+      <div class="panel-bar bg-indigo">
+        <h2 class="panel-title">OBAT SEDANG DIRACIK</h2>
+        <button onclick="undoLast('diracik')" class="staff-only hidden btn-undo-mini">↩ Undo</button>
       </div>
-      <form onsubmit="handleAddItems(event, 'diracik')" class="staff-only hidden flex gap-1.5 mb-1.5 shrink-0">
-        <input id="inputDiracik" type="text" placeholder="Ketik nomor (cth: A12, C3, B5)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
+      <form onsubmit="handleAddItems(event, 'diracik')" class="staff-only hidden form-add">
+        <input id="inputDiracik" type="text" placeholder="Ketik nomor (cth: A12, C3, B5)..." class="input-add" />
+        <button type="submit" class="btn-add bg-indigo">Tambah</button>
       </form>
-      <div id="listDiracik" class="scroll-area-y flex-1 flex flex-wrap content-start gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic my-auto">Belum ada antrian diracik</p>
+      <div id="listDiracik" class="list-wrap-y">
+        <p class="empty-msg">Belum ada antrian diracik</p>
       </div>
     </section>
 
     <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI -->
-    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-rose-600 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
-      <div class="w-full bg-rose-600 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          OBAT SEDANG DIKONFIRMASI
-        </h2>
-        <button onclick="undoLast('konfirmasi')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+    <section class="sec-panel sec-konfirmasi">
+      <div class="panel-bar bg-rose">
+        <h2 class="panel-title">OBAT SEDANG DIKONFIRMASI</h2>
+        <button onclick="undoLast('konfirmasi')" class="staff-only hidden btn-undo-mini">↩ Undo</button>
       </div>
-      <form onsubmit="handleAddItems(event, 'konfirmasi')" class="staff-only hidden flex gap-1.5 mb-1 shrink-0">
-        <input id="inputKonfirmasi" type="text" placeholder="Ketik nomor (cth: A10, C2, B8)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
+      <form onsubmit="handleAddItems(event, 'konfirmasi')" class="staff-only hidden form-add">
+        <input id="inputKonfirmasi" type="text" placeholder="Ketik nomor (cth: A10, C2, B8)..." class="input-add" />
+        <button type="submit" class="btn-add bg-rose">Tambah</button>
       </form>
-      <div id="listKonfirmasi" class="scroll-area-x flex-1 flex flex-nowrap items-center gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic">Belum ada antrian dikonfirmasi</p>
+      <div id="listKonfirmasi" class="list-wrap-x">
+        <p class="empty-msg">Belum ada antrian dikonfirmasi</p>
       </div>
     </section>
 
     <!-- BAGIAN 4: TIDAK DAPAT OBAT -->
-    <section class="flex-[0.6] bg-white rounded-2xl border-2 border-purple-700 p-2 sm:p-2.5 flex flex-col justify-between min-h-0 shadow-sm">
-      <div class="w-full bg-purple-700 text-white px-3 py-1 rounded-lg flex items-center justify-between gap-2 mb-1 shrink-0">
-        <h2 class="text-[11px] sm:text-sm lg:text-base font-extrabold uppercase tracking-wide">
-          TIDAK DAPAT OBAT
-        </h2>
-        <button onclick="undoLast('tidakDapat')" class="staff-only hidden bg-white/20 hover:bg-white/30 text-white border border-white/40 text-[11px] font-bold px-2 py-0.5 rounded active:scale-95">
-          ↩ Undo
-        </button>
+    <section class="sec-panel sec-tidak">
+      <div class="panel-bar bg-purple">
+        <h2 class="panel-title">TIDAK DAPAT OBAT</h2>
+        <button onclick="undoLast('tidakDapat')" class="staff-only hidden btn-undo-mini">↩ Undo</button>
       </div>
-      <form onsubmit="handleAddItems(event, 'tidakDapat')" class="staff-only hidden flex gap-1.5 mb-1 shrink-0">
-        <input id="inputTidakDapat" type="text" placeholder="Ketik nomor (cth: A4, C1, B9)..." class="flex-1 border border-slate-300 rounded-lg px-2.5 py-1 text-xs sm:text-sm font-semibold uppercase" />
-        <button type="submit" class="bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs sm:text-sm px-3 py-1 rounded-lg shrink-0">Tambah</button>
+      <form onsubmit="handleAddItems(event, 'tidakDapat')" class="staff-only hidden form-add">
+        <input id="inputTidakDapat" type="text" placeholder="Ketik nomor (cth: A4, C1, B9)..." class="input-add" />
+        <button type="submit" class="btn-add bg-purple">Tambah</button>
       </form>
-      <div id="listTidakDapat" class="scroll-area-x flex-1 flex flex-nowrap items-center gap-1.5 sm:gap-2">
-        <p class="w-full text-center text-xs sm:text-sm text-slate-400 italic">Belum ada antrian tidak dapat obat</p>
+      <div id="listTidakDapat" class="list-wrap-x">
+        <p class="empty-msg">Belum ada antrian tidak dapat obat</p>
       </div>
     </section>
   </main>
 
   <!-- MODAL LOGIN PETUGAS -->
-  <div id="loginModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200">
-      <h3 class="text-base font-extrabold text-emerald-900 text-center">Login Petugas Farmasi</h3>
-      <p class="text-xs text-slate-500 text-center mt-0.5 mb-4">Depo Central Farmasi</p>
-      <form onsubmit="submitLogin(event)" class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
-          <input id="loginUser" type="text" required autocomplete="off" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan username" />
+  <div id="loginModal" class="hidden modal-overlay">
+    <div class="modal-card">
+      <h3 class="modal-title">Login Petugas Farmasi</h3>
+      <p class="modal-sub">Depo Central Farmasi</p>
+      <form onsubmit="submitLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input id="loginUser" type="text" required autocomplete="off" class="form-input" placeholder="Masukkan username" />
         </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
-          <input id="loginPass" type="password" required class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm" placeholder="Masukkan password" />
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="loginPass" type="password" required class="form-input" placeholder="Masukkan password" />
         </div>
-        <p id="loginErr" class="hidden text-xs font-semibold text-rose-600 text-center">Username atau password salah!</p>
-        <div class="flex gap-2 pt-1">
-          <button type="button" onclick="closeLoginModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-lg">Batal</button>
-          <button type="submit" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2.5 rounded-lg">Masuk</button>
+        <p id="loginErr" class="hidden login-err">Username atau password salah!</p>
+        <div class="modal-actions">
+          <button type="button" onclick="closeLoginModal()" class="btn-modal-cancel">Batal</button>
+          <button type="submit" class="btn-modal-ok">Masuk</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL QR CODE -->
-  <div id="qrModal" class="hidden fixed inset-0 bg-slate-900/70 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-xs p-5 shadow-2xl border border-slate-200 flex flex-col items-center text-center">
-      <h3 class="text-sm font-extrabold text-emerald-900">QR Code Antrian Pasien</h3>
-      <p class="text-[11px] text-slate-500 mt-0.5 mb-3">Scan QR atau buka alamat di bawah untuk memantau antrean obat secara real-time</p>
-      <div id="qrcodeBox" class="p-3 bg-white border-2 border-emerald-800 rounded-xl flex items-center justify-center"></div>
-      <p id="qrUrlText" class="text-xs font-extrabold text-emerald-900 break-all mt-2.5 mb-3 px-1"></p>
-      <div class="flex gap-2 w-full">
-        <button onclick="window.print()" class="flex-1 bg-emerald-800 text-white font-bold text-xs py-2 rounded-lg">Cetak</button>
-        <button onclick="closeQrModal()" class="flex-1 bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-lg">Tutup</button>
+  <div id="qrModal" class="hidden modal-overlay">
+    <div class="modal-card" style="text-align: center;">
+      <h3 class="modal-title">QR Code Antrian Pasien</h3>
+      <p class="modal-sub">Scan QR atau buka alamat di bawah untuk memantau antrean obat secara real-time</p>
+      <div id="qrcodeBox" class="qr-big-box"></div>
+      <p id="qrUrlText" class="qr-url-lbl"></p>
+      <div class="modal-actions">
+        <button onclick="window.print()" class="btn-modal-ok" style="margin-right: 8px;">Cetak</button>
+        <button onclick="closeQrModal()" class="btn-modal-cancel" style="margin-right: 0;">Tutup</button>
       </div>
     </div>
   </div>
@@ -305,10 +681,10 @@
 
     function getBadgeColor(token) {
       const f = token.charAt(0).toUpperCase();
-      if (f === "A") return "bg-sky-50 text-sky-900 border-sky-500";
-      if (f === "B") return "bg-emerald-50 text-emerald-900 border-emerald-600";
-      if (f === "C") return "bg-amber-50 text-amber-900 border-amber-500";
-      return "bg-slate-100 text-slate-800 border-slate-400";
+      if (f === "A") return "tok-a";
+      if (f === "B") return "tok-b";
+      if (f === "C") return "tok-c";
+      return "tok-def";
     }
 
     function adjustDynamicLayout() {
@@ -320,7 +696,7 @@
       if (isStaff) {
         secUtama.style.flex = "0.95";
         secDiracik.style.flex = "1.45";
-        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
+        nums.forEach(function(n) { n.className = "smooth-num num-md"; });
         return;
       }
 
@@ -328,22 +704,22 @@
       let rowCount = 1;
       if (badges.length > 0) {
         const tops = new Set();
-        badges.forEach(b => tops.add(Math.round(b.offsetTop / 12)));
+        badges.forEach(function(b) { tops.add(Math.round(b.offsetTop / 12)); });
         rowCount = tops.size;
       }
 
       if (rowCount <= 1) {
         secUtama.style.flex = "1.55";
         secDiracik.style.flex = "0.85";
-        nums.forEach(n => { n.className = "smooth-num text-5xl sm:text-7xl lg:text-8xl font-black text-slate-800 tracking-tight leading-none"; });
+        nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
       } else if (rowCount === 2) {
         secUtama.style.flex = "1.1";
         secDiracik.style.flex = "1.3";
-        nums.forEach(n => { n.className = "smooth-num text-4xl sm:text-6xl lg:text-7xl font-black text-slate-800 tracking-tight leading-none"; });
+        nums.forEach(function(n) { n.className = "smooth-num num-md"; });
       } else {
         secUtama.style.flex = "0.75";
         secDiracik.style.flex = "1.65";
-        nums.forEach(n => { n.className = "smooth-num text-3xl sm:text-5xl lg:text-6xl font-black text-slate-800 tracking-tight leading-none"; });
+        nums.forEach(function(n) { n.className = "smooth-num num-sm"; });
       }
     }
 
@@ -368,7 +744,7 @@
 
       if (isStaff) {
         badge.textContent = "PETUGAS";
-        badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900";
+        badge.className = "badge-mode staff";
         patientQrWidget.classList.add("hidden");
         btnResetAll.classList.remove("hidden");
         btnQr.classList.remove("hidden");
@@ -376,7 +752,7 @@
         btnUndoReset.classList.toggle("hidden", !resetBackup);
       } else {
         badge.textContent = "PASIEN";
-        badge.className = "text-[10px] sm:text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-800 text-emerald-100 border border-emerald-700";
+        badge.className = "badge-mode";
         patientQrWidget.classList.remove("hidden");
         initHeaderQr();
         btnResetAll.classList.add("hidden");
@@ -392,15 +768,15 @@
       const box = document.getElementById(id);
       const sorted = sortQueueTokens(items);
       if (sorted.length === 0) {
-        box.innerHTML = '<p class="w-full text-center text-xs sm:text-sm text-slate-400 italic my-auto">' + emptyMsg + '</p>';
+        box.innerHTML = '<p class="empty-msg">' + emptyMsg + '</p>';
         return;
       }
       box.innerHTML = sorted.map(function(t) {
         const cls = getBadgeColor(t);
         if (isStaff) {
-          return '<button onclick="removeToken(\'' + key + '\', \'' + t.replace(/'/g, "\\'") + '\')" class="' + cls + ' shrink-0 border-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl font-black text-base sm:text-xl lg:text-2xl flex items-center gap-2 shadow-2xs active:scale-95"><span>' + t + '</span><span class="text-xs sm:text-sm opacity-60">✕</span></button>';
+          return '<button onclick="removeToken(\'' + key + '\', \'' + t.replace(/'/g, "\\'") + '\')" class="token-btn ' + cls + '"><span>' + t + '</span><span class="token-x">✕</span></button>';
         }
-        return '<span class="' + cls + ' shrink-0 border-2 px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-xl font-black text-lg sm:text-2xl lg:text-3xl shadow-2xs">' + t + '</span>';
+        return '<span class="token-badge ' + cls + '">' + t + '</span>';
       }).join("");
     }
 
@@ -411,7 +787,7 @@
         const res = await fetch(DB_URL + "?t=" + Date.now());
         if (!res.ok) throw new Error();
         const data = await res.json();
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
+        document.getElementById("connDot").className = "conn-dot online";
         if (data) {
           state.A = Number(data.A) || 0;
           state.B = Number(data.B) || 0;
@@ -422,7 +798,7 @@
         }
         renderUI();
       } catch (e) {
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-amber-400 inline-block";
+        document.getElementById("connDot").className = "conn-dot offline";
       }
     }
 
@@ -441,7 +817,7 @@
             tidakDapat: sortQueueTokens(state.tidakDapat || [])
           })
         });
-        document.getElementById("connDot").className = "w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block";
+        document.getElementById("connDot").className = "conn-dot online";
       } catch (e) {}
       isSaving = false;
     }
