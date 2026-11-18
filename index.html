@@ -249,10 +249,23 @@
       flex-direction: column;
       min-height: 0;
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: flex 0.3s ease, padding 0.3s ease;
     }
     .sec-diracik { flex: 0.85; border: 2px solid #4f46e5; margin-bottom: 8px; }
     .sec-konfirmasi { flex: 0.65; border: 2px solid #e11d48; margin-bottom: 8px; }
     .sec-tidak { flex: 0.65; border: 2px solid #7e22ce; }
+
+    /* MODE RAMPING SAAT KOTAK BAWAH KOSONG & DIRACIK RAMAI */
+    .sec-panel.panel-slim {
+      flex: 0 0 auto !important;
+      padding: 5px 8px;
+    }
+    .sec-panel.panel-slim .panel-bar {
+      margin-bottom: 0;
+    }
+    .sec-panel.panel-slim .list-wrap {
+      display: none;
+    }
 
     .panel-bar {
       width: 100%;
@@ -424,6 +437,7 @@
       .num-md { font-size: 56px; }
       .num-sm { font-size: 46px; }
       .sec-panel { padding: 10px; }
+      .sec-panel.panel-slim { padding: 6px 10px; }
       .sec-diracik, .sec-konfirmasi { margin-bottom: 10px; }
       .panel-bar { padding: 6px 14px; }
       .panel-title { font-size: 16px; }
@@ -795,6 +809,8 @@
 
       if (isStaff) {
         document.body.classList.add("is-staff");
+        secKonfirmasi.classList.remove("panel-slim");
+        secTidak.classList.remove("panel-slim");
         secUtama.style.flex = "0.95";
         secDiracik.style.flex = "1.35";
         secKonfirmasi.style.flex = "0.85";
@@ -805,7 +821,10 @@
 
       document.body.classList.remove("is-staff");
 
-      // Reset ukuran token ke ukuran besar standar lebih dulu untuk mengukur jumlah baris
+      // Reset class slim & ukuran token ke ukuran besar standar terlebih dulu untuk mengukur baris
+      secKonfirmasi.classList.remove("panel-slim");
+      secTidak.classList.remove("panel-slim");
+
       const allLists = [listDiracik, listKonfirmasi, listTidakDapat];
       allLists.forEach(function(lst) {
         lst.querySelectorAll(".token-badge").forEach(function(b) {
@@ -813,14 +832,29 @@
         });
       });
 
+      const isKonfirmasiKosong = (state.konfirmasi || []).length === 0;
+      const isTidakKosong = (state.tidakDapat || []).length === 0;
+
       let rDir = countRows(listDiracik);
       let rKon = countRows(listKonfirmasi);
       let rTdk = countRows(listTidakDapat);
-      let totalRows = rDir + rKon + rTdk;
 
-      // Jika total baris > 5 di layar TV, kecilkan sedikit ukuran badge agar semua tetap muat tanpa scroll
-      if (totalRows > 5) {
-        const denseClass = totalRows > 8 ? "tok-dense" : "tok-compact";
+      // PRIORITAS 1: Saat obat diracik banyak (> 1 baris) & kotak bawah kosong,
+      // kotak bawah yang kosong dikecilkan (slim) dulu agar 3 kotak atas tetap besar!
+      const slimKonfirmasi = (rDir > 1) && isKonfirmasiKosong;
+      const slimTidak = (rDir > 1) && isTidakKosong;
+
+      secKonfirmasi.classList.toggle("panel-slim", slimKonfirmasi);
+      secTidak.classList.toggle("panel-slim", slimTidak);
+
+      // Hitung baris efektif (kotak yang slim dihitung 0 baris tambahan karena hanya header)
+      let effRKon = slimKonfirmasi ? 0 : rKon;
+      let effRTdk = slimTidak ? 0 : rTdk;
+      let totalEffectiveRows = rDir + effRKon + effRTdk;
+
+      // Jika total baris efektif masih padat, kecilkan sedikit ukuran badge agar muat tanpa scroll
+      if (totalEffectiveRows > 4) {
+        const denseClass = totalEffectiveRows > 7 ? "tok-dense" : "tok-compact";
         allLists.forEach(function(lst) {
           if (countRows(lst) > 1) {
             lst.querySelectorAll(".token-badge").forEach(function(b) {
@@ -831,23 +865,32 @@
         rDir = countRows(listDiracik);
         rKon = countRows(listKonfirmasi);
         rTdk = countRows(listTidakDapat);
-        totalRows = rDir + rKon + rTdk;
+        effRKon = slimKonfirmasi ? 0 : rKon;
+        effRTdk = slimTidak ? 0 : rTdk;
+        totalEffectiveRows = rDir + effRKon + effRTdk;
       }
 
       listDiracik.classList.toggle("multi-row", rDir > 1);
       listKonfirmasi.classList.toggle("multi-row", rKon > 1);
       listTidakDapat.classList.toggle("multi-row", rTdk > 1);
 
-      // Sesuaikan porsi tinggi masing-masing panel bawah berdasarkan jumlah barisnya
-      secDiracik.style.flex = String(0.65 + (rDir * 0.35));
-      secKonfirmasi.style.flex = String(0.50 + (rKon * 0.35));
-      secTidak.style.flex = String(0.50 + (rTdk * 0.35));
+      // Atur rasio flex panel bawah
+      secDiracik.style.flex = String(0.65 + (rDir * 0.38));
+      secKonfirmasi.style.flex = slimKonfirmasi ? "0 0 auto" : String(0.50 + (rKon * 0.35));
+      secTidak.style.flex = slimTidak ? "0 0 auto" : String(0.50 + (rTdk * 0.35));
 
-      // Kotak atas (UMUM, BPJS, PRIORITAS) mengecil otomatis jika baris bawah bertambah
-      if (totalRows <= 3) {
+      // PRIORITAS 2: 3 kotak atas (UMUM, BPJS, PRIORITAS) tetap besar selama ruang dari kotak bawah
+      // masih cukup. Baru mengecil jika kotak bawah ada isinya atau diracik sudah sangat penuh (> 3 baris).
+      const bawahAdaIsi = !isKonfirmasiKosong || !isTidakKosong;
+
+      if (!bawahAdaIsi && rDir <= 3) {
+        // Kotak bawah kosong & diracik masih muat memakan ruang kotak bawah -> 3 kotak atas TETAP BESAR
         secUtama.style.flex = "1.5";
         nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
-      } else if (totalRows <= 5) {
+      } else if (totalEffectiveRows <= 3) {
+        secUtama.style.flex = "1.5";
+        nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
+      } else if (totalEffectiveRows <= 5) {
         secUtama.style.flex = "1.05";
         nums.forEach(function(n) { n.className = "smooth-num num-md"; });
       } else {
