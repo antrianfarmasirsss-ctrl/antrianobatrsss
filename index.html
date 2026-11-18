@@ -418,32 +418,42 @@
     .qr-big-box { padding: 12px; background-color: #ffffff; border: 2px solid #065f46; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .qr-url-lbl { font-size: 12px; font-weight: 800; color: #064e3b; word-break: break-all; margin: 10px 0 12px 0; }
 
-    /* KHUSUS TAMPILAN HP (< 640px): BEBAS SCROLL VERTIKAL AGAR BAWAH TIDAK KEPOTONG */
+    /* KHUSUS TAMPILAN HP (< 640px): FIT 1 LAYAR PENUH SECARA PROPORSIONAL */
     @media (max-width: 639px) {
       #btnFullscreen { display: none !important; }
       html, body {
-        height: auto;
-        min-height: 100dvh;
-        overflow-y: auto;
-        overflow-x: hidden;
+        height: 100%;
+        height: 100dvh;
+        overflow: hidden;
       }
       .main-wrap {
-        flex: none;
-        padding-bottom: 24px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 6px;
+        min-height: 0;
       }
       .sec-utama {
-        flex: none;
-        min-height: 118px;
+        margin-bottom: 6px;
+      }
+      .card-tag {
+        font-size: 12px;
+        padding: 4px 2px;
       }
       .sec-panel {
-        flex: none;
+        padding: 6px;
+      }
+      .sec-diracik, .sec-konfirmasi {
+        margin-bottom: 6px;
       }
       .sec-panel .list-wrap {
-        min-height: 52px;
+        overflow-y: auto;
         align-content: flex-start;
       }
-      .sec-panel.panel-slim .list-wrap {
-        min-height: 0;
+      .token-badge {
+        font-size: 15px;
+        padding: 3px 10px;
+        margin: 2px;
       }
     }
 
@@ -834,21 +844,6 @@
       const listTidakDapat = document.getElementById("listTidakDapat");
       const nums = [document.getElementById("valA"), document.getElementById("valB"), document.getElementById("valC")];
 
-      const isMobile = window.innerWidth < 640;
-
-      // KHUSUS LAYAR HP: Biarkan tinggi panel otomatis mengikuti isi agar bisa di-scroll tanpa kepotong
-      if (isMobile) {
-        document.body.classList.toggle("is-staff", isStaff);
-        secKonfirmasi.classList.remove("panel-slim");
-        secTidak.classList.remove("panel-slim");
-        secUtama.style.flex = "";
-        secDiracik.style.flex = "";
-        secKonfirmasi.style.flex = "";
-        secTidak.style.flex = "";
-        nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
-        return;
-      }
-
       if (isStaff) {
         document.body.classList.add("is-staff");
         secKonfirmasi.classList.remove("panel-slim");
@@ -916,17 +911,16 @@
       listKonfirmasi.classList.toggle("multi-row", rKon > 1);
       listTidakDapat.classList.toggle("multi-row", rTdk > 1);
 
-      // Atur rasio flex panel bawah
+      // Atur rasio flex panel bawah agar mengisi penuh sisa tinggi layar
       secDiracik.style.flex = String(0.65 + (rDir * 0.38));
-      secKonfirmasi.style.flex = slimKonfirmasi ? "0 0 auto" : String(0.50 + (rKon * 0.35));
-      secTidak.style.flex = slimTidak ? "0 0 auto" : String(0.50 + (rTdk * 0.35));
+      secKonfirmasi.style.flex = slimKonfirmasi ? "0 0 auto" : String(0.55 + (rKon * 0.35));
+      secTidak.style.flex = slimTidak ? "0 0 auto" : String(0.55 + (rTdk * 0.35));
 
       // PRIORITAS 2: 3 kotak atas (UMUM, BPJS, PRIORITAS) tetap besar selama ruang dari kotak bawah
       // masih cukup. Baru mengecil jika kotak bawah ada isinya atau diracik sudah sangat penuh (> 3 baris).
       const bawahAdaIsi = !isKonfirmasiKosong || !isTidakKosong;
 
       if (!bawahAdaIsi && rDir <= 3) {
-        // Kotak bawah kosong & diracik masih muat memakan ruang kotak bawah -> 3 kotak atas TETAP BESAR
         secUtama.style.flex = "1.5";
         nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
       } else if (totalEffectiveRows <= 3) {
