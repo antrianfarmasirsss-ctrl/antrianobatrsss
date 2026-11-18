@@ -418,7 +418,7 @@
     .qr-big-box { padding: 12px; background-color: #ffffff; border: 2px solid #065f46; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .qr-url-lbl { font-size: 12px; font-weight: 800; color: #064e3b; word-break: break-all; margin: 10px 0 12px 0; }
 
-    /* KHUSUS TAMPILAN HP (< 640px): FIT 1 LAYAR PENUH SECARA PROPORSIONAL */
+    /* KHUSUS TAMPILAN HP (< 640px): FIT 1 LAYAR PENUH & NOMOR ANTRIAN DIPERBESAR */
     @media (max-width: 639px) {
       #btnFullscreen { display: none !important; }
       html, body {
@@ -451,9 +451,14 @@
         align-content: flex-start;
       }
       .token-badge {
-        font-size: 15px;
-        padding: 3px 10px;
-        margin: 2px;
+        font-size: 21px;
+        padding: 4px 12px;
+        margin: 3px;
+      }
+      .token-btn {
+        font-size: 18px;
+        padding: 4px 10px;
+        margin: 3px;
       }
     }
 
