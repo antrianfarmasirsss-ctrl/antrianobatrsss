@@ -152,11 +152,11 @@
       padding: 8px;
       min-height: 0;
     }
-    .smooth-box { transition: flex 0.35s ease; }
+    .smooth-box { transition: flex 0.3s ease; }
 
     /* BAGIAN 1: 3 KOLOM ANTRIAN UTAMA */
     .sec-utama {
-      flex: 1.55;
+      flex: 1.5;
       display: flex;
       flex-direction: row;
       min-height: 0;
@@ -208,7 +208,7 @@
       color: #1e293b;
       letter-spacing: -0.02em;
       line-height: 1;
-      transition: font-size 0.35s ease;
+      transition: font-size 0.3s ease;
     }
     .num-lg { font-size: 48px; }
     .num-md { font-size: 38px; }
@@ -251,8 +251,8 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
     .sec-diracik { flex: 0.85; border: 2px solid #4f46e5; margin-bottom: 8px; }
-    .sec-konfirmasi { flex: 0.6; border: 2px solid #e11d48; margin-bottom: 8px; justify-content: space-between; }
-    .sec-tidak { flex: 0.6; border: 2px solid #7e22ce; justify-content: space-between; }
+    .sec-konfirmasi { flex: 0.65; border: 2px solid #e11d48; margin-bottom: 8px; }
+    .sec-tidak { flex: 0.65; border: 2px solid #7e22ce; }
 
     .panel-bar {
       width: 100%;
@@ -311,22 +311,21 @@
       flex-shrink: 0;
     }
 
-    /* LIST CONTAINER */
-    .list-wrap-y {
+    /* LIST CONTAINER (SEMUA WRAP AGAR TURUN BARIS SAAT RAMAI) */
+    .list-wrap {
       flex: 1;
       display: flex;
       flex-wrap: wrap;
-      align-content: flex-start;
-      overflow-y: auto;
+      align-content: center;
+      overflow: hidden;
       min-height: 0;
     }
-    .list-wrap-x {
-      flex: 1;
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: center;
-      overflow-x: auto;
-      min-height: 0;
+    .list-wrap.multi-row {
+      align-content: flex-start;
+    }
+    body.is-staff .list-wrap {
+      overflow-y: auto;
+      align-content: flex-start;
     }
     .empty-msg {
       width: 100%;
@@ -337,7 +336,7 @@
       margin: auto 0;
     }
 
-    /* BADGE NOMOR ANTRIAN */
+    /* BADGE NOMOR ANTRIAN (DIRACIK, DIKONFIRMASI, TIDAK DAPAT OBAT) */
     .token-badge {
       flex-shrink: 0;
       border-width: 2px;
@@ -349,6 +348,8 @@
       margin: 3px;
       display: inline-flex;
       align-items: center;
+      line-height: 1.05;
+      transition: font-size 0.25s ease, padding 0.25s ease;
     }
     .token-btn {
       flex-shrink: 0;
@@ -361,6 +362,7 @@
       margin: 3px;
       display: inline-flex;
       align-items: center;
+      line-height: 1.05;
     }
     .token-x { font-size: 12px; opacity: 0.6; margin-left: 8px; }
     .tok-a { background-color: #f0f9ff; color: #0c4a6e; border-color: #0ea5e9; }
@@ -418,16 +420,16 @@
       .card-utama { padding: 10px; }
       .card-utama:nth-child(2) { margin: 0 10px; }
       .card-tag { font-size: 16px; padding: 6px; }
-      .num-lg { font-size: 80px; }
-      .num-md { font-size: 62px; }
-      .num-sm { font-size: 50px; }
+      .num-lg { font-size: 72px; }
+      .num-md { font-size: 56px; }
+      .num-sm { font-size: 46px; }
       .sec-panel { padding: 10px; }
       .sec-diracik, .sec-konfirmasi { margin-bottom: 10px; }
       .panel-bar { padding: 6px 14px; }
       .panel-title { font-size: 16px; }
       .input-add, .btn-add { font-size: 14px; }
       .empty-msg { font-size: 15px; }
-      .token-badge { font-size: 26px; padding: 6px 20px; margin: 4px; }
+      .token-badge { font-size: 28px; padding: 6px 20px; margin: 4px; }
       .token-btn { font-size: 22px; padding: 5px 16px; margin: 4px; }
     }
 
@@ -436,14 +438,35 @@
       .header-title { font-size: 24px; }
       .header-sub { font-size: 15px; }
       .card-tag { font-size: 24px; padding: 8px 10px; }
-      .num-lg { font-size: 120px; }
-      .num-md { font-size: 86px; }
-      .num-sm { font-size: 68px; }
+      .num-lg { font-size: 96px; }
+      .num-md { font-size: 72px; }
+      .num-sm { font-size: 56px; }
       .panel-bar { padding: 7px 16px; }
       .panel-title { font-size: 22px; }
       .empty-msg { font-size: 18px; }
-      .token-badge { font-size: 34px; padding: 8px 24px; margin: 5px; }
-      .token-btn { font-size: 26px; }
+      .token-badge {
+        font-size: 48px;
+        padding: 8px 26px;
+        margin: 5px;
+        border-width: 3px;
+        border-radius: 14px;
+      }
+      .token-badge.tok-compact {
+        font-size: 36px;
+        padding: 6px 20px;
+        margin: 4px;
+      }
+      .token-badge.tok-dense {
+        font-size: 28px;
+        padding: 4px 16px;
+        margin: 3px;
+      }
+      .token-btn {
+        font-size: 32px;
+        padding: 6px 18px;
+        margin: 5px;
+        border-width: 3px;
+      }
     }
   </style>
 </head>
@@ -532,13 +555,13 @@
         <input id="inputDiracik" type="text" placeholder="Ketik nomor (cth: A12, C3, B5)..." class="input-add" />
         <button type="submit" class="btn-add bg-indigo">Tambah</button>
       </form>
-      <div id="listDiracik" class="list-wrap-y">
+      <div id="listDiracik" class="list-wrap">
         <p class="empty-msg">Belum ada antrian diracik</p>
       </div>
     </section>
 
     <!-- BAGIAN 3: OBAT SEDANG DIKONFIRMASI -->
-    <section class="sec-panel sec-konfirmasi">
+    <section id="secKonfirmasi" class="smooth-box sec-panel sec-konfirmasi">
       <div class="panel-bar bg-rose">
         <h2 class="panel-title">OBAT SEDANG DIKONFIRMASI</h2>
         <button onclick="undoLast('konfirmasi')" class="staff-only hidden btn-undo-mini">↩ Undo</button>
@@ -547,13 +570,13 @@
         <input id="inputKonfirmasi" type="text" placeholder="Ketik nomor (cth: A10, C2, B8)..." class="input-add" />
         <button type="submit" class="btn-add bg-rose">Tambah</button>
       </form>
-      <div id="listKonfirmasi" class="list-wrap-x">
+      <div id="listKonfirmasi" class="list-wrap">
         <p class="empty-msg">Belum ada antrian dikonfirmasi</p>
       </div>
     </section>
 
     <!-- BAGIAN 4: TIDAK DAPAT OBAT -->
-    <section class="sec-panel sec-tidak">
+    <section id="secTidak" class="smooth-box sec-panel sec-tidak">
       <div class="panel-bar bg-purple">
         <h2 class="panel-title">TIDAK DAPAT OBAT</h2>
         <button onclick="undoLast('tidakDapat')" class="staff-only hidden btn-undo-mini">↩ Undo</button>
@@ -562,7 +585,7 @@
         <input id="inputTidakDapat" type="text" placeholder="Ketik nomor (cth: A4, C1, B9)..." class="input-add" />
         <button type="submit" class="btn-add bg-purple">Tambah</button>
       </form>
-      <div id="listTidakDapat" class="list-wrap-x">
+      <div id="listTidakDapat" class="list-wrap">
         <p class="empty-msg">Belum ada antrian tidak dapat obat</p>
       </div>
     </section>
@@ -749,38 +772,86 @@
       return "tok-def";
     }
 
+    function countRows(container) {
+      const items = container.querySelectorAll(".token-badge, .token-btn");
+      if (items.length === 0) return 1;
+      const tops = new Set();
+      items.forEach(function(el) {
+        tops.add(Math.round(el.offsetTop / 14));
+      });
+      return Math.max(1, tops.size);
+    }
+
     function adjustDynamicLayout() {
       const secUtama = document.getElementById("secUtama");
       const secDiracik = document.getElementById("secDiracik");
+      const secKonfirmasi = document.getElementById("secKonfirmasi");
+      const secTidak = document.getElementById("secTidak");
+
       const listDiracik = document.getElementById("listDiracik");
+      const listKonfirmasi = document.getElementById("listKonfirmasi");
+      const listTidakDapat = document.getElementById("listTidakDapat");
       const nums = [document.getElementById("valA"), document.getElementById("valB"), document.getElementById("valC")];
 
       if (isStaff) {
+        document.body.classList.add("is-staff");
         secUtama.style.flex = "0.95";
-        secDiracik.style.flex = "1.45";
+        secDiracik.style.flex = "1.35";
+        secKonfirmasi.style.flex = "0.85";
+        secTidak.style.flex = "0.85";
         nums.forEach(function(n) { n.className = "smooth-num num-md"; });
         return;
       }
 
-      const badges = listDiracik.querySelectorAll("span");
-      let rowCount = 1;
-      if (badges.length > 0) {
-        const tops = new Set();
-        badges.forEach(function(b) { tops.add(Math.round(b.offsetTop / 12)); });
-        rowCount = tops.size;
+      document.body.classList.remove("is-staff");
+
+      // Reset ukuran token ke ukuran besar standar lebih dulu untuk mengukur jumlah baris
+      const allLists = [listDiracik, listKonfirmasi, listTidakDapat];
+      allLists.forEach(function(lst) {
+        lst.querySelectorAll(".token-badge").forEach(function(b) {
+          b.classList.remove("tok-compact", "tok-dense");
+        });
+      });
+
+      let rDir = countRows(listDiracik);
+      let rKon = countRows(listKonfirmasi);
+      let rTdk = countRows(listTidakDapat);
+      let totalRows = rDir + rKon + rTdk;
+
+      // Jika total baris > 5 di layar TV, kecilkan sedikit ukuran badge agar semua tetap muat tanpa scroll
+      if (totalRows > 5) {
+        const denseClass = totalRows > 8 ? "tok-dense" : "tok-compact";
+        allLists.forEach(function(lst) {
+          if (countRows(lst) > 1) {
+            lst.querySelectorAll(".token-badge").forEach(function(b) {
+              b.classList.add(denseClass);
+            });
+          }
+        });
+        rDir = countRows(listDiracik);
+        rKon = countRows(listKonfirmasi);
+        rTdk = countRows(listTidakDapat);
+        totalRows = rDir + rKon + rTdk;
       }
 
-      if (rowCount <= 1) {
-        secUtama.style.flex = "1.55";
-        secDiracik.style.flex = "0.85";
+      listDiracik.classList.toggle("multi-row", rDir > 1);
+      listKonfirmasi.classList.toggle("multi-row", rKon > 1);
+      listTidakDapat.classList.toggle("multi-row", rTdk > 1);
+
+      // Sesuaikan porsi tinggi masing-masing panel bawah berdasarkan jumlah barisnya
+      secDiracik.style.flex = String(0.65 + (rDir * 0.35));
+      secKonfirmasi.style.flex = String(0.50 + (rKon * 0.35));
+      secTidak.style.flex = String(0.50 + (rTdk * 0.35));
+
+      // Kotak atas (UMUM, BPJS, PRIORITAS) mengecil otomatis jika baris bawah bertambah
+      if (totalRows <= 3) {
+        secUtama.style.flex = "1.5";
         nums.forEach(function(n) { n.className = "smooth-num num-lg"; });
-      } else if (rowCount === 2) {
-        secUtama.style.flex = "1.1";
-        secDiracik.style.flex = "1.3";
+      } else if (totalRows <= 5) {
+        secUtama.style.flex = "1.05";
         nums.forEach(function(n) { n.className = "smooth-num num-md"; });
       } else {
         secUtama.style.flex = "0.75";
-        secDiracik.style.flex = "1.65";
         nums.forEach(function(n) { n.className = "smooth-num num-sm"; });
       }
     }
