@@ -504,7 +504,7 @@
       .panel-title { font-size: 22px; }
       .empty-msg { font-size: 18px; }
 
-      /* NOMOR RACIKAN, KONFIRMASI, TIDAK DAPAT OBAT (NILAI TENGAH) */
+      /* NOMOR RACIKAN (NILAI TENGAH PROPORSIONAL) */
       .token-badge {
         font-size: 56px;
         padding: 8px 28px;
@@ -527,6 +527,57 @@
         padding: 7px 20px;
         margin: 5px;
         border-width: 3px;
+      }
+    }
+
+    /* PERKECIL NOMOR URUT KHUSUS DI KONFIRMASI & TIDAK DAPAT OBAT SAJA */
+    #secKonfirmasi .token-badge,
+    #secTidak .token-badge {
+      font-size: 15px;
+      padding: 3px 10px;
+    }
+    #secKonfirmasi .token-btn,
+    #secTidak .token-btn {
+      font-size: 14px;
+      padding: 3px 9px;
+    }
+
+    @media (min-width: 640px) {
+      #secKonfirmasi .token-badge,
+      #secTidak .token-badge {
+        font-size: 20px;
+        padding: 4px 14px;
+      }
+      #secKonfirmasi .token-btn,
+      #secTidak .token-btn {
+        font-size: 18px;
+        padding: 4px 12px;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      #secKonfirmasi .token-badge,
+      #secTidak .token-badge {
+        font-size: 32px;
+        padding: 5px 18px;
+        border-width: 2px;
+        border-radius: 12px;
+      }
+      #secKonfirmasi .token-badge.tok-compact,
+      #secTidak .token-badge.tok-compact {
+        font-size: 26px;
+        padding: 4px 14px;
+      }
+      #secKonfirmasi .token-badge.tok-dense,
+      #secTidak .token-badge.tok-dense {
+        font-size: 22px;
+        padding: 3px 12px;
+      }
+      #secKonfirmasi .token-btn,
+      #secTidak .token-btn {
+        font-size: 26px;
+        padding: 5px 14px;
+        border-width: 2px;
       }
     }
   </style>
