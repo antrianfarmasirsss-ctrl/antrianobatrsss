@@ -865,13 +865,14 @@
 
       document.body.classList.remove("is-staff");
 
-      // Reset class slim & ukuran token ke ukuran besar standar terlebih dulu untuk mengukur baris
+      // Matikan transisi sesaat ketika mengukur agar tidak berkedip/bergetar
       secKonfirmasi.classList.remove("panel-slim");
       secTidak.classList.remove("panel-slim");
 
       const allLists = [listDiracik, listKonfirmasi, listTidakDapat];
       allLists.forEach(function(lst) {
         lst.querySelectorAll(".token-badge").forEach(function(b) {
+          b.style.transition = "none";
           b.classList.remove("tok-compact", "tok-dense");
         });
       });
@@ -940,6 +941,13 @@
         secUtama.style.flex = "0.75";
         nums.forEach(function(n) { n.className = "smooth-num num-sm"; });
       }
+
+      // Aktifkan kembali transisi setelah layout selesai dihitung
+      requestAnimationFrame(function() {
+        document.querySelectorAll(".token-badge").forEach(function(b) {
+          b.style.transition = "";
+        });
+      });
     }
 
     function renderUI() {
@@ -1000,6 +1008,8 @@
     }
 
     let isSaving = false;
+    let lastStateStr = "";
+
     async function syncFromFirebase() {
       if (isSaving) return;
       try {
@@ -1008,14 +1018,21 @@
         const data = await res.json();
         document.getElementById("connDot").className = "conn-dot online";
         if (data) {
-          state.A = Number(data.A) || 0;
-          state.B = Number(data.B) || 0;
-          state.C = Number(data.C) || 0;
-          state.diracik = Array.isArray(data.diracik) ? data.diracik : [];
-          state.konfirmasi = Array.isArray(data.konfirmasi) ? data.konfirmasi : [];
-          state.tidakDapat = Array.isArray(data.tidakDapat) ? data.tidakDapat : [];
+          const newState = {
+            A: Number(data.A) || 0,
+            B: Number(data.B) || 0,
+            C: Number(data.C) || 0,
+            diracik: Array.isArray(data.diracik) ? data.diracik : [],
+            konfirmasi: Array.isArray(data.konfirmasi) ? data.konfirmasi : [],
+            tidakDapat: Array.isArray(data.tidakDapat) ? data.tidakDapat : []
+          };
+          const newStr = JSON.stringify(newState);
+          if (newStr !== lastStateStr) {
+            lastStateStr = newStr;
+            state = newState;
+            renderUI();
+          }
         }
-        renderUI();
       } catch (e) {
         document.getElementById("connDot").className = "conn-dot offline";
       }
@@ -1023,18 +1040,20 @@
 
     async function saveToFirebase() {
       isSaving = true;
+      const payload = {
+        A: state.A || 0,
+        B: state.B || 0,
+        C: state.C || 0,
+        diracik: sortQueueTokens(state.diracik || []),
+        konfirmasi: sortQueueTokens(state.konfirmasi || []),
+        tidakDapat: sortQueueTokens(state.tidakDapat || [])
+      };
+      lastStateStr = JSON.stringify(payload);
       try {
         await fetch(DB_URL, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            A: state.A || 0,
-            B: state.B || 0,
-            C: state.C || 0,
-            diracik: sortQueueTokens(state.diracik || []),
-            konfirmasi: sortQueueTokens(state.konfirmasi || []),
-            tidakDapat: sortQueueTokens(state.tidakDapat || [])
-          })
+          body: JSON.stringify(payload)
         });
         document.getElementById("connDot").className = "conn-dot online";
       } catch (e) {}
