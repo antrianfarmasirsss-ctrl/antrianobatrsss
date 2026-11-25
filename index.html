@@ -327,7 +327,7 @@
       flex-shrink: 0;
     }
 
-    /* LIST CONTAINER (SEMUA WRAP AGAR TURUN BARIS SAAT RAMAI) */
+    /* LIST CONTAINER */
     .list-wrap {
       flex: 1;
       display: flex;
@@ -352,7 +352,7 @@
       margin: auto 0;
     }
 
-    /* BADGE NOMOR ANTRIAN (DIRACIK, DIKONFIRMASI, TIDAK DAPAT OBAT) */
+    /* BADGE NOMOR ANTRIAN */
     .token-badge {
       flex-shrink: 0;
       border-width: 2px;
@@ -418,7 +418,7 @@
     .qr-big-box { padding: 12px; background-color: #ffffff; border: 2px solid #065f46; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .qr-url-lbl { font-size: 12px; font-weight: 800; color: #064e3b; word-break: break-all; margin: 10px 0 12px 0; }
 
-    /* KHUSUS TAMPILAN HP (< 640px): FIT 1 LAYAR PENUH & NOMOR ANTRIAN DIPERBESAR */
+    /* KHUSUS TAMPILAN HP (< 640px) */
     @media (max-width: 639px) {
       #btnFullscreen { display: none !important; }
       html, body {
@@ -433,19 +433,10 @@
         padding: 6px;
         min-height: 0;
       }
-      .sec-utama {
-        margin-bottom: 6px;
-      }
-      .card-tag {
-        font-size: 12px;
-        padding: 4px 2px;
-      }
-      .sec-panel {
-        padding: 6px;
-      }
-      .sec-diracik, .sec-konfirmasi {
-        margin-bottom: 6px;
-      }
+      .sec-utama { margin-bottom: 6px; }
+      .card-tag { font-size: 12px; padding: 4px 2px; }
+      .sec-panel { padding: 6px; }
+      .sec-diracik, .sec-konfirmasi { margin-bottom: 6px; }
       .sec-panel .list-wrap {
         overflow-y: auto;
         align-content: flex-start;
@@ -495,7 +486,6 @@
       .header-sub { font-size: 15px; }
       .card-tag { font-size: 34px; padding: 10px 12px; }
 
-      /* NOMOR UTAMA (UMUM, BPJS, PRIORITAS) TETAP PALING MENONJOL */
       .num-lg { font-size: 120px; }
       .num-md { font-size: 96px; }
       .num-sm { font-size: 80px; }
@@ -504,7 +494,6 @@
       .panel-title { font-size: 22px; }
       .empty-msg { font-size: 18px; }
 
-      /* NOMOR RACIKAN (NILAI TENGAH PROPORSIONAL) */
       .token-badge {
         font-size: 56px;
         padding: 8px 28px;
@@ -530,7 +519,7 @@
       }
     }
 
-    /* SAMAKAN UKURAN KONFIRMASI & TIDAK DAPAT OBAT DENGAN UKURAN RACIKAN SAAT 2 BARIS */
+    /* UKURAN KONFIRMASI & TIDAK DAPAT OBAT */
     #secKonfirmasi .token-badge,
     #secTidak .token-badge {
       font-size: 21px;
@@ -741,14 +730,108 @@
   <!-- SCRIPT UTAMA -->
   <script>
     const DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/queue_state.json";
+    const REKAP_BASE_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/rekap_resep/";
     const PUBLIC_QR_URL = "https://tinyurl.com/antrianfarmasirsss";
 
-    let state = { A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
+    function getWitaTodayKey() {
+      return new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Makassar",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(new Date());
+    }
+
+    let state = { activeDate: getWitaTodayKey(), A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
     let historyStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
+    let addedHistoryStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
     let resetBackup = null;
     let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
+    let isRollingOverDate = false;
 
-    /* FULLSCREEN HANDLER (KOMPATIBEL TV LAMA & BARU) */
+    async function recordDailyRekap(options) {
+      const opts = options || {};
+      const dateKey = opts.targetDate || getWitaTodayKey();
+      const snap = opts.snapshot || state;
+      const targetUrl = REKAP_BASE_URL + dateKey + ".json";
+      try {
+        const res = await fetch(targetUrl + "?t=" + Date.now());
+        const existing = (res.ok ? await res.json() : null) || {};
+
+        let rList = Array.isArray(existing.racikanList) ? existing.racikanList.slice() : [];
+        let tList = Array.isArray(existing.tidakDapatList) ? existing.tidakDapatList.slice() : [];
+
+        if (Array.isArray(opts.addRacikan) && opts.addRacikan.length > 0) {
+          rList = sortQueueTokens(rList.concat(opts.addRacikan));
+        }
+        if (Array.isArray(opts.removeRacikan) && opts.removeRacikan.length > 0) {
+          const remSet = new Set(opts.removeRacikan);
+          rList = rList.filter(function(x) { return !remSet.has(x); });
+        }
+
+        if (Array.isArray(opts.addTidak) && opts.addTidak.length > 0) {
+          tList = sortQueueTokens(tList.concat(opts.addTidak));
+        }
+        if (Array.isArray(opts.removeTidak) && opts.removeTidak.length > 0) {
+          const remSetT = new Set(opts.removeTidak);
+          tList = tList.filter(function(x) { return !remSetT.has(x); });
+        }
+
+        const prevRacikanNum = Number(existing.racikan) || 0;
+        let nextRacikanNum = Math.max(prevRacikanNum, rList.length);
+        if (Array.isArray(opts.removeRacikan) && opts.removeRacikan.length > 0) {
+          nextRacikanNum = rList.length;
+        }
+
+        const updatedRekap = {
+          A: Math.max(Number(existing.A) || 0, Number(snap.A) || 0),
+          B: Math.max(Number(existing.B) || 0, Number(snap.B) || 0),
+          C: Math.max(Number(existing.C) || 0, Number(snap.C) || 0),
+          racikan: nextRacikanNum,
+          racikanList: rList,
+          tidakDapatList: tList,
+          updatedAt: new Date().toISOString()
+        };
+
+        await fetch(targetUrl, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedRekap)
+        });
+      } catch (e) {}
+    }
+
+    async function performDailyAutoReset(prevData, prevDateKey, todayKey) {
+      if (isRollingOverDate) return;
+      isRollingOverDate = true;
+      try {
+        if (prevData && prevDateKey) {
+          const hasData = (Number(prevData.A) || 0) > 0 ||
+                          (Number(prevData.B) || 0) > 0 ||
+                          (Number(prevData.C) || 0) > 0 ||
+                          (Array.isArray(prevData.diracik) && prevData.diracik.length > 0) ||
+                          (Array.isArray(prevData.tidakDapat) && prevData.tidakDapat.length > 0);
+          if (hasData) {
+            await recordDailyRekap({
+              targetDate: prevDateKey,
+              snapshot: prevData,
+              addRacikan: Array.isArray(prevData.diracik) ? prevData.diracik : [],
+              addTidak: Array.isArray(prevData.tidakDapat) ? prevData.tidakDapat : []
+            });
+          }
+        }
+        state = { activeDate: todayKey, A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
+        historyStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
+        addedHistoryStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
+        resetBackup = null;
+        renderUI();
+        await saveToFirebase();
+      } finally {
+        isRollingOverDate = false;
+      }
+    }
+
+    /* FULLSCREEN HANDLER */
     function isFullscreenActive() {
       return !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
     }
@@ -917,7 +1000,6 @@
 
       document.body.classList.remove("is-staff");
 
-      // Matikan transisi sesaat ketika mengukur agar tidak berkedip/bergetar
       secKonfirmasi.classList.remove("panel-slim");
       secTidak.classList.remove("panel-slim");
 
@@ -936,20 +1018,16 @@
       let rKon = countRows(listKonfirmasi);
       let rTdk = countRows(listTidakDapat);
 
-      // PRIORITAS 1: Saat obat diracik banyak (> 1 baris) & kotak bawah kosong,
-      // kotak bawah yang kosong dikecilkan (slim) dulu agar 3 kotak atas tetap besar!
       const slimKonfirmasi = (rDir > 1) && isKonfirmasiKosong;
       const slimTidak = (rDir > 1) && isTidakKosong;
 
       secKonfirmasi.classList.toggle("panel-slim", slimKonfirmasi);
       secTidak.classList.toggle("panel-slim", slimTidak);
 
-      // Hitung baris efektif (kotak yang slim dihitung 0 baris tambahan karena hanya header)
       let effRKon = slimKonfirmasi ? 0 : rKon;
       let effRTdk = slimTidak ? 0 : rTdk;
       let totalEffectiveRows = rDir + effRKon + effRTdk;
 
-      // Jika total baris efektif masih padat, kecilkan sedikit ukuran badge agar muat tanpa scroll
       if (totalEffectiveRows > 4) {
         const denseClass = totalEffectiveRows > 7 ? "tok-dense" : "tok-compact";
         allLists.forEach(function(lst) {
@@ -971,13 +1049,10 @@
       listKonfirmasi.classList.toggle("multi-row", rKon > 1);
       listTidakDapat.classList.toggle("multi-row", rTdk > 1);
 
-      // Atur rasio flex panel bawah agar mengisi penuh sisa tinggi layar
       secDiracik.style.flex = String(0.65 + (rDir * 0.38));
       secKonfirmasi.style.flex = slimKonfirmasi ? "0 0 auto" : String(0.55 + (rKon * 0.35));
       secTidak.style.flex = slimTidak ? "0 0 auto" : String(0.55 + (rTdk * 0.35));
 
-      // PRIORITAS 2: 3 kotak atas (UMUM, BPJS, PRIORITAS) tetap besar selama ruang dari kotak bawah
-      // masih cukup. Baru mengecil jika kotak bawah ada isinya atau diracik sudah sangat penuh (> 3 baris).
       const bawahAdaIsi = !isKonfirmasiKosong || !isTidakKosong;
 
       if (!bawahAdaIsi && rDir <= 3) {
@@ -994,7 +1069,6 @@
         nums.forEach(function(n) { n.className = "smooth-num num-sm"; });
       }
 
-      // Aktifkan kembali transisi setelah layout selesai dihitung
       requestAnimationFrame(function() {
         document.querySelectorAll(".token-badge").forEach(function(b) {
           b.style.transition = "";
@@ -1063,14 +1137,26 @@
     let lastStateStr = "";
 
     async function syncFromFirebase() {
-      if (isSaving) return;
+      if (isSaving || isRollingOverDate) return;
+      const todayKey = getWitaTodayKey();
       try {
         const res = await fetch(DB_URL + "?t=" + Date.now());
         if (!res.ok) throw new Error();
         const data = await res.json();
         document.getElementById("connDot").className = "conn-dot online";
         if (data) {
+          const remoteDate = data.activeDate || "";
+          if (remoteDate && remoteDate !== todayKey) {
+            await performDailyAutoReset(data, remoteDate, todayKey);
+            return;
+          }
+          if (!remoteDate) {
+            state.activeDate = todayKey;
+            await saveToFirebase();
+          }
+
           const newState = {
+            activeDate: todayKey,
             A: Number(data.A) || 0,
             B: Number(data.B) || 0,
             C: Number(data.C) || 0,
@@ -1092,7 +1178,10 @@
 
     async function saveToFirebase() {
       isSaving = true;
+      const todayKey = getWitaTodayKey();
+      state.activeDate = todayKey;
       const payload = {
+        activeDate: todayKey,
         A: state.A || 0,
         B: state.B || 0,
         C: state.C || 0,
@@ -1112,32 +1201,56 @@
       isSaving = false;
     }
 
-    function stepCounter(type, delta) {
+    async function ensureTodayBeforeAction() {
+      const todayKey = getWitaTodayKey();
+      if (state.activeDate && state.activeDate !== todayKey) {
+        await performDailyAutoReset(state, state.activeDate, todayKey);
+      }
+    }
+
+    async function stepCounter(type, delta) {
       if (!isStaff) return;
+      await ensureTodayBeforeAction();
       state[type] = Math.max(0, (Number(state[type]) || 0) + delta);
       renderUI();
       saveToFirebase();
+      if (delta > 0) {
+        recordDailyRekap();
+      }
     }
 
-    function handleAddItems(e, key) {
+    async function handleAddItems(e, key) {
       e.preventDefault();
       if (!isStaff) return;
+      await ensureTodayBeforeAction();
       const inputMap = { diracik: "inputDiracik", konfirmasi: "inputKonfirmasi", tidakDapat: "inputTidakDapat" };
       const inp = document.getElementById(inputMap[key]);
       const raw = inp.value.trim().toUpperCase();
       if (!raw) return;
       const tokens = raw.split(/[\s,;]+/).filter(Boolean);
       if (tokens.length === 0) return;
+
+      const existingSet = new Set(state[key] || []);
+      const newlyAdded = tokens.filter(function(t) { return !existingSet.has(t); });
+
       historyStack[key].push([...(state[key] || [])]);
+      addedHistoryStack[key].push(newlyAdded);
       state[key] = sortQueueTokens([...(state[key] || []), ...tokens]);
       inp.value = "";
       renderUI();
       saveToFirebase();
+
+      if (key === "diracik" && newlyAdded.length > 0) {
+        recordDailyRekap({ addRacikan: newlyAdded });
+      } else if (key === "tidakDapat" && newlyAdded.length > 0) {
+        recordDailyRekap({ addTidak: newlyAdded });
+      }
     }
 
     function removeToken(key, token) {
       if (!isStaff) return;
       historyStack[key].push([...(state[key] || [])]);
+      addedHistoryStack[key].push([]);
       state[key] = (state[key] || []).filter(function(i) { return i !== token; });
       renderUI();
       saveToFirebase();
@@ -1146,14 +1259,22 @@
     function undoLast(key) {
       if (!isStaff || historyStack[key].length === 0) return;
       state[key] = historyStack[key].pop();
+      const undoneAdded = addedHistoryStack[key].pop() || [];
       renderUI();
       saveToFirebase();
+
+      if (key === "diracik" && undoneAdded.length > 0) {
+        recordDailyRekap({ removeRacikan: undoneAdded });
+      } else if (key === "tidakDapat" && undoneAdded.length > 0) {
+        recordDailyRekap({ removeTidak: undoneAdded });
+      }
     }
 
     function confirmResetAll() {
       if (!isStaff) return;
       if (confirm("apa anda yakin ingin reset semua tampilan no antrian kembali k 0 ?")) {
         resetBackup = {
+          activeDate: state.activeDate || getWitaTodayKey(),
           A: state.A || 0,
           B: state.B || 0,
           C: state.C || 0,
@@ -1161,8 +1282,9 @@
           konfirmasi: [...(state.konfirmasi || [])],
           tidakDapat: [...(state.tidakDapat || [])]
         };
-        state = { A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
+        state = { activeDate: getWitaTodayKey(), A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
         historyStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
+        addedHistoryStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
         renderUI();
         saveToFirebase();
       }
@@ -1172,6 +1294,7 @@
       if (!isStaff || !resetBackup) return;
       if (confirm("Kembalikan semua data antrian seperti sebelum di-reset?")) {
         state = {
+          activeDate: getWitaTodayKey(),
           A: resetBackup.A,
           B: resetBackup.B,
           C: resetBackup.C,
@@ -1182,6 +1305,10 @@
         resetBackup = null;
         renderUI();
         saveToFirebase();
+        recordDailyRekap({
+          addRacikan: state.diracik,
+          addTidak: state.tidakDapat
+        });
       }
     }
 
