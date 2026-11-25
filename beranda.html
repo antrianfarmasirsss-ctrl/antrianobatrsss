@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Portal Layanan Farmasi - RSUD Sultan Suriansyah Banjarmasin</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      min-height: 100dvh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* HEADER */
+    .portal-header {
+      background-color: #064e3b;
+      color: #ffffff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+      flex-shrink: 0;
+    }
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background-color: #ffffff;
+      color: #064e3b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+    .header-title {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+    }
+    .header-sub {
+      font-size: 12px;
+      color: #a7f3d0;
+      margin-top: 2px;
+      font-weight: 500;
+    }
+    .header-clock {
+      text-align: right;
+      flex-shrink: 0;
+      margin-left: 12px;
+    }
+    .clock-time {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      font-variant-numeric: tabular-nums;
+    }
+    .clock-date {
+      font-size: 11px;
+      color: #a7f3d0;
+      margin-top: 2px;
+    }
+
+    /* MAIN CONTAINER */
+    .portal-main {
+      flex: 1;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .welcome-banner {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .welcome-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #064e3b;
+    }
+    .welcome-desc {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    /* GRID 4 KOTAK MENU */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    .menu-card {
+      text-decoration: none;
+      color: #ffffff;
+      border-radius: 18px;
+      padding: 22px 20px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      border: none;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+    }
+    .menu-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+    }
+    .menu-card:active {
+      transform: scale(0.98);
+    }
+
+    /* WARNA MASING-MASING KOTAK */
+    .card-antrian {
+      background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+      border: 2px solid #10b981;
+    }
+    .card-jne {
+      background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+      border: 2px solid #3b82f6;
+    }
+    .card-rekap {
+      background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+      border: 2px solid #f59e0b;
+    }
+    .card-obat {
+      background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+      border: 2px solid #8b5cf6;
+    }
+
+    .card-icon-box {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      background-color: rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      backdrop-filter: blur(4px);
+    }
+    .card-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .card-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background-color: rgba(255, 255, 255, 0.2);
+      margin-bottom: 6px;
+    }
+    .card-title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1.2;
+      letter-spacing: 0.01em;
+    }
+    .card-desc {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      line-height: 1.4;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    .card-arrow {
+      font-size: 22px;
+      font-weight: 800;
+      opacity: 0.85;
+      flex-shrink: 0;
+    }
+
+    /* FOOTER */
+    .portal-footer {
+      background-color: #064e3b;
+      color: #d1fae5;
+      text-align: center;
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    /* MODAL INFO MODUL BELUM AKTIF (UNTUK KOTAK 2 & 4 SEMENTARA) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-box {
+      background-color: #ffffff;
+      border-radius: 16px;
+      max-width: 340px;
+      width: 100%;
+      padding: 22px 20px;
+      text-align: center;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+    }
+    .modal-icon { font-size: 40px; margin-bottom: 8px; }
+    .modal-title { margin: 0 0 6px 0; font-size: 17px; font-weight: 800; color: #0f172a; }
+    .modal-text { margin: 0 0 16px 0; font-size: 13px; color: #475569; line-height: 1.45; }
+    .btn-close-modal {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background-color: #064e3b;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* RESPONSIF TABLET & KOMPUTER (>= 640px) -> GRID 2x2 */
+    @media (min-width: 640px) {
+      .portal-header { padding: 16px 28px; }
+      .header-title { font-size: 20px; }
+      .header-sub { font-size: 13px; }
+      .clock-time { font-size: 22px; }
+      .clock-date { font-size: 12px; }
+      .welcome-title { font-size: 24px; }
+      .welcome-desc { font-size: 14px; }
+      .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .menu-card {
+        padding: 28px 24px;
+        min-height: 165px;
+      }
+      .card-icon-box {
+        width: 72px;
+        height: 72px;
+        font-size: 36px;
+      }
+      .card-title { font-size: 21px; }
+      .card-desc { font-size: 14px; }
+    }
+
+    /* RESPONSIF LAYAR BESAR / TV (>= 1024px) */
+    @media (min-width: 1024px) {
+      .header-title { font-size: 24px; }
+      .clock-time { font-size: 26px; }
+      .welcome-title { font-size: 28px; }
+      .menu-card {
+        padding: 34px 28px;
+        min-height: 190px;
+      }
+      .card-title { font-size: 24px; }
+      .card-desc { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="portal-header">
+    <div class="header-brand">
+      <div class="brand-icon">🏥</div>
+      <div>
+        <h1 class="header-title">Farmasi RSUD Sultan Suriansyah Banjarmasin</h1>
+        <div class="header-sub">Depo Central Farmasi • Portal Layanan Terpadu</div>
+      </div>
+    </div>
+    <div class="header-clock">
+      <div id="clockTime" class="clock-time">--:--:--</div>
+      <div id="clockDate" class="clock-date">Memuat tanggal...</div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="portal-main">
+    <div class="welcome-banner">
+      <h2 class="welcome-title">Selamat Datang di Portal Layanan Farmasi</h2>
+      <p class="welcome-desc">Silakan pilih menu layanan di bawah ini</p>
+    </div>
+
+    <!-- GRID 4 KOTAK -->
+    <div class="menu-grid">
+      <!-- KOTAK 1: ANTRIAN FARMASI (TERHUBUNG KE PROYEK 1 index.html) -->
+      <a href="index.html" class="menu-card card-antrian">
+        <div class="card-icon-box">🖥️</div>
+        <div class="card-body">
+          <span class="card-badge">Layanan Utama</span>
+          <h3 class="card-title">ANTRIAN FARMASI</h3>
+          <p class="card-desc">Pantau & panggil nomor antrean obat (Umum, BPJS, Prioritas, Racikan)</p>
+        </div>
+        <span class="card-arrow">➔</span>
+      </a>
+
+      <!-- KOTAK 2: PANTAU PENGIRIMAN JNE -->
+      <button type="button" onclick="openComingSoon('Pantau Pengiriman JNE', 'Modul pelacakan nomor resi pengiriman obat ke rumah pasien melalui kurir JNE sedang dalam tahap persiapan.')" class="menu-card card-jne">
+        <div class="card-icon-box">🚚</div>
+        <div class="card-body">
+          <span class="card-badge">Layanan Antar Obat</span>
+          <h3 class="card-title">PANTAU PENGIRIMAN JNE</h3>
+          <p class="card-desc">Lacak status pengiriman paket obat langsung ke rumah Anda</p>
+        </div>
+        <span class="card-arrow">➔</span>
+      </button>
+
+      <!-- KOTAK 3: REKAPITULASI PELAYANAN RESEP (TERHUBUNG KE rekap.html) -->
+      <a href="rekap.html" class="menu-card card-rekap">
+        <div class="card-icon-box">📊</div>
+        <div class="card-body">
+          <span class="card-badge">Laporan & Statistik</span>
+          <h3 class="card-title">REKAPITULASI PELAYANAN RESEP</h3>
+          <p class="card-desc">Ringkasan harian & bulanan resep A, B, C, Racikan, dan Tidak Dapat Obat</p>
+        </div>
+        <span class="card-arrow">➔</span>
+      </a>
+
+      <!-- KOTAK 4: CARA PENGGUNAAN OBAT -->
+      <button type="button" onclick="openComingSoon('Cara Penggunaan Obat', 'Panduan edukasi aturan minum obat dan cara pakai obat khusus bagi pasien sedang dalam tahap persiapan.')" class="menu-card card-obat">
+        <div class="card-icon-box">💊</div>
+        <div class="card-body">
+          <span class="card-badge">Edukasi Pasien</span>
+          <h3 class="card-title">CARA PENGGUNAAN OBAT</h3>
+          <p class="card-desc">Informasi aturan pakai, penyimpanan, dan panduan minum obat yang benar</p>
+        </div>
+        <span class="card-arrow">➔</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="portal-footer">
+    Melayani dengan Ramah, Cepat, dan Aman • Depo Central Farmasi RSUD Sultan Suriansyah Banjarmasin
+  </footer>
+
+  <!-- MODAL PEMBERITAHUAN MODUL DALAM TAHAP PERSIAPAN -->
+  <div id="infoModal" class="modal-overlay hidden" onclick="closeComingSoon(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-icon">🛠️</div>
+      <h3 id="modalTitle" class="modal-title">Judul Modul</h3>
+      <p id="modalText" class="modal-text">Keterangan modul.</p>
+      <button type="button" onclick="closeComingSoon()" class="btn-close-modal">Mengerti</button>
+    </div>
+  </div>
+
+  <script>
+    function updateWitaClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString("id-ID", {
+        timeZone: "Asia/Makassar",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).replace(/\./g, ":");
+      const dateStr = now.toLocaleDateString("id-ID", {
+        timeZone: "Asia/Makassar",
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+      });
+      document.getElementById("clockTime").textContent = timeStr + " WITA";
+      document.getElementById("clockDate").textContent = dateStr;
+    }
+    updateWitaClock();
+    setInterval(updateWitaClock, 1000);
+
+    function openComingSoon(title, desc) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalText").textContent = desc;
+      document.getElementById("infoModal").classList.remove("hidden");
+    }
+
+    function closeComingSoon() {
+      document.getElementById("infoModal").classList.add("hidden");
+    }
+  </script>
+</body>
+</html>
