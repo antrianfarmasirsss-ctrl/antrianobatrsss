@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rekapitulasi Pelayanan Resep - RSUD Sultan Suriansyah Banjarmasin</title>
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+      background-color: #f1f5f9;
+      color: #1e293b;
+    }
+    button { cursor: pointer; border: none; font-family: inherit; }
+    button:active { transform: scale(0.97); }
+    .hidden { display: none !important; }
+
+    /* HEADER */
+    .app-header {
+      background-color: #064e3b;
+      color: #ffffff;
+      padding: 12px 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+    .header-top {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background-color: #ffffff;
+      color: #064e3b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .header-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .header-sub {
+      font-size: 11px;
+      color: #a7f3d0;
+      margin-top: 2px;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .conn-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background-color: #fbbf24;
+      display: inline-block;
+    }
+    .conn-dot.online { background-color: #34d399; }
+    .btn-nav {
+      background-color: #065f46;
+      color: #ffffff;
+      border: 1px solid #10b981;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-staff-login {
+      background-color: #fbbf24;
+      color: #0f172a;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+    .btn-staff-logout {
+      background-color: #e11d48;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    /* MAIN WRAPPER */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 14px 12px 32px 12px;
+    }
+
+    /* FILTER & EXPORT BAR */
+    .filter-card {
+      background-color: #ffffff;
+      border-radius: 14px;
+      padding: 12px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      margin-bottom: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+    .filter-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #475569;
+      width: 100%;
+    }
+    .date-inputs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      min-width: 240px;
+    }
+    .input-date {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 7px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #0f172a;
+      background-color: #f8fafc;
+      min-width: 0;
+    }
+    .btn-filter {
+      background-color: #047857;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+    }
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .btn-tool {
+      background-color: #f8fafc;
+      color: #1e293b;
+      border: 1px solid #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 12px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-add-manual {
+      background-color: #0284c7;
+      color: #ffffff;
+      border: none;
+    }
+
+    /* SUMMARY CARDS (TOTAL RESEP) */
+    .sec-heading {
+      font-size: 13px;
+      font-weight: 800;
+      color: #334155;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin: 0 0 10px 2px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .sum-card {
+      border-radius: 14px;
+      padding: 14px;
+      color: #ffffff;
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .sum-card.span-full {
+      grid-column: span 2;
+    }
+    .bg-umum { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); }
+    .bg-bpjs { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+    .bg-prioritas { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); }
+    .bg-racikan { background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); }
+    .bg-tidak { background: linear-gradient(135deg, #7e22ce 0%, #581c87 100%); }
+
+    .sum-title {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.92;
+    }
+    .sum-value {
+      font-size: 24px;
+      font-weight: 900;
+      margin-top: 6px;
+      line-height: 1.1;
+    }
+
+    /* TABLE CARD */
+    .table-card {
+      background-color: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    .table-header-bar {
+      padding: 12px 14px;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .table-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .staff-hint {
+      font-size: 11px;
+      color: #b45309;
+      background-color: #fef3c7;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 620px;
+      font-size: 13px;
+    }
+    thead th {
+      background-color: #f8fafc;
+      color: #334155;
+      font-weight: 800;
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 10px 8px;
+      border-bottom: 2px solid #e2e8f0;
+      text-align: center;
+      white-space: nowrap;
+    }
+    thead th:first-child {
+      text-align: left;
+      padding-left: 14px;
+      position: sticky;
+      left: 0;
+      background-color: #f8fafc;
+      z-index: 2;
+    }
+    tbody td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: center;
+      color: #1e293b;
+      font-weight: 600;
+    }
+    tbody td:first-child {
+      text-align: left;
+      padding-left: 14px;
+      font-weight: 700;
+      color: #0f172a;
+      position: sticky;
+      left: 0;
+      background-color: #ffffff;
+      z-index: 1;
+      white-space: nowrap;
+      border-right: 1px solid #f1f5f9;
+    }
+    tbody tr:hover td {
+      background-color: #f8fafc;
+    }
+    .td-tidak {
+      color: #6b21a8;
+      font-weight: 700;
+      max-width: 210px;
+      word-break: break-word;
+    }
+    .btn-edit-row {
+      background-color: #e0f2fe;
+      color: #0369a1;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.72);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal-card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 380px;
+      padding: 20px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
+    .modal-title {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #064e3b;
+    }
+    .modal-sub {
+      margin: 0 0 14px 0;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .form-group { margin-bottom: 10px; }
+    .form-group.full { grid-column: span 2; }
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 4px;
+    }
+    .form-input {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .btn-cancel {
+      flex: 1;
+      background-color: #e2e8f0;
+      color: #334155;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .btn-save {
+      flex: 1;
+      background-color: #047857;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .err-text {
+      color: #e11d48;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 6px 0 0 0;
+    }
+
+    /* RESPONSIF DESKTOP (>= 768px) */
+    @media (min-width: 768px) {
+      .header-title { font-size: 18px; }
+      .header-sub { font-size: 12px; }
+      .filter-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .filter-label { width: auto; }
+      .summary-grid {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .sum-card.span-full {
+        grid-column: span 1;
+      }
+      .sum-value { font-size: 26px; }
+    }
+
+    /* MODE CETAK / PRINT */
+    @media print {
+      .app-header .header-actions,
+      .filter-card,
+      .col-aksi {
+        display: none !important;
+      }
+      body { background-color: #ffffff; }
+      .app-header {
+        position: static;
+        background-color: #064e3b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .sum-card {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .table-card { border: 1px solid #cbd5e1; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand-wrap">
+        <div class="brand-logo">📊</div>
+        <div>
+          <h1 class="header-title">Rekapitulasi Pelayanan Resep</h1>
+          <div class="header-sub">Depo Central Farmasi • RSUD Sultan Suriansyah Banjarmasin</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span id="connDot" class="conn-dot" title="Status Koneksi"></span>
+        <a href="beranda.html" class="btn-nav">← Beranda</a>
+        <button id="btnLoginStaff" onclick="openLoginModal()" class="btn-staff-login">Login Edit</button>
+        <button id="btnLogoutStaff" onclick="logoutStaff()" class="hidden btn-staff-logout">Keluar</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- FILTER PERIODE & AKSI -->
+    <section class="filter-card">
+      <div class="filter-row">
+        <span class="filter-label">Periode Tanggal:</span>
+        <div class="date-inputs">
+          <input type="date" id="startDate" class="input-date" />
+          <span style="font-size:12px; font-weight:700; color:#64748b;">s/d</span>
+          <input type="date" id="endDate" class="input-date" />
+        </div>
+        <button type="button" onclick="applyFilter()" class="btn-filter">Tampilkan</button>
+      </div>
+
+      <div class="action-buttons">
+        <button id="btnManualInput" type="button" onclick="openEditModal()" class="hidden btn-tool btn-add-manual">+ Input / Koreksi Harian</button>
+        <button type="button" onclick="exportCSV()" class="btn-tool">📥 Export Excel</button>
+        <button type="button" onclick="window.print()" class="btn-tool">🖨️ Cetak</button>
+      </div>
+    </section>
+
+    <!-- KARTU TOTAL RINGKASAN (HANYA ANGKA TOTAL) -->
+    <h2 id="totalHeading" class="sec-heading">Total Resep Periode Terpilih</h2>
+    <section class="summary-grid">
+      <div class="sum-card bg-umum">
+        <span class="sum-title">Umum (A)</span>
+        <span id="totA" class="sum-value">0 Resep</span>
+      </div>
+      <div class="sum-card bg-bpjs">
+        <span class="sum-title">BPJS (B)</span>
+        <span id="totB" class="sum-value">0 Resep</span>
+      </div>
+      <div class="sum-card bg-prioritas">
+        <span class="sum-title">Prioritas (C)</span>
+        <span id="totC" class="sum-value">0 Resep</span>
+      </div>
+      <div class="sum-card bg-racikan">
+        <span class="sum-title">Resep Racikan</span>
+        <span id="totRacikan" class="sum-value">0 Resep</span>
+      </div>
+      <div class="sum-card bg-tidak span-full">
+        <span class="sum-title">Tidak Dapat Obat</span>
+        <span id="totTidak" class="sum-value">0 Resep</span>
+      </div>
+    </section>
+
+    <!-- TABEL RIWAYAT HARIAN -->
+    <section class="table-card">
+      <div class="table-header-bar">
+        <h3 id="tableHeading" class="table-title">Riwayat Pelayanan Harian</h3>
+        <span id="staffModeHint" class="hidden staff-hint">Mode Petugas Aktif: Klik "Edit" untuk koreksi angka</span>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Umum (A)</th>
+              <th>BPJS (B)</th>
+              <th>Prioritas (C)</th>
+              <th>Resep Racikan</th>
+              <th>Tidak Dapat Obat</th>
+              <th class="col-aksi staff-col hidden">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="rekapTableBody">
+            <tr>
+              <td colspan="7" style="text-align:center; padding:24px; color:#94a3b8;">Memuat data rekapitulasi...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL LOGIN PETUGAS -->
+  <div id="loginModal" class="hidden modal-overlay">
+    <div class="modal-card" style="max-width:320px;">
+      <h3 class="modal-title">Login Petugas Farmasi</h3>
+      <p class="modal-sub">Masuk untuk mengoreksi atau menambah data rekap</p>
+      <form onsubmit="submitLogin(event)">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input id="loginUser" type="text" required autocomplete="off" class="form-input" placeholder="Masukkan username" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input id="loginPass" type="password" required class="form-input" placeholder="Masukkan password" />
+        </div>
+        <p id="loginErr" class="hidden err-text">Username atau password salah!</p>
+        <div class="modal-actions">
+          <button type="button" onclick="closeLoginModal()" class="btn-cancel">Batal</button>
+          <button type="submit" class="btn-save">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT / KOREKSI DATA HARIAN -->
+  <div id="editModal" class="hidden modal-overlay">
+    <div class="modal-card">
+      <h3 class="modal-title">Koreksi / Input Data Rekap</h3>
+      <p class="modal-sub">Sesuaikan angka rekapitulasi pelayanan resep harian</p>
+      <form onsubmit="saveEditRecord(event)">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label class="form-label">Tanggal</label>
+            <input id="editDate" type="date" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Umum (A)</label>
+            <input id="editA" type="number" min="0" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">BPJS (B)</label>
+            <input id="editB" type="number" min="0" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Prioritas (C)</label>
+            <input id="editC" type="number" min="0" required class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Resep Racikan</label>
+            <input id="editRacikan" type="number" min="0" required class="form-input" />
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Nomor Resep Tidak Dapat Obat (pisahkan dengan koma)</label>
+            <input id="editTidakList" type="text" class="form-input" placeholder="Contoh: A14, B80, C5 (kosongkan jika 0)" style="text-transform:uppercase;" />
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" onclick="closeEditModal()" class="btn-cancel">Batal</button>
+          <button type="submit" class="btn-save">Simpan Perubahan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const REKAP_DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/rekap_resep.json";
+    const QUEUE_DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/queue_state.json";
+
+    let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
+    let rekapMap = {};
+    let filteredRows = [];
+
+    function getWitaTodayStr() {
+      const now = new Date();
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Makassar",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).format(now);
+      return parts; // YYYY-MM-DD
+    }
+
+    function initDefaultDates() {
+      const today = getWitaTodayStr();
+      const firstDay = today.slice(0, 8) + "01";
+      document.getElementById("startDate").value = firstDay;
+      document.getElementById("endDate").value = today;
+    }
+
+    function formatTanggalIndo(dateStr) {
+      if (!dateStr) return "-";
+      const [y, m, d] = dateStr.split("-");
+      const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+      return d + " " + (bulan[parseInt(m, 10) - 1] || m) + " " + y;
+    }
+
+    function parseTokens(raw) {
+      if (Array.isArray(raw)) return raw.map(s => String(s).trim().toUpperCase()).filter(Boolean);
+      if (typeof raw === "string") return raw.split(/[\s,;]+/).map(s => s.trim().toUpperCase()).filter(Boolean);
+      return [];
+    }
+
+    function updateStaffUI() {
+      document.getElementById("btnLoginStaff").classList.toggle("hidden", isStaff);
+      document.getElementById("btnLogoutStaff").classList.toggle("hidden", !isStaff);
+      document.getElementById("btnManualInput").classList.toggle("hidden", !isStaff);
+      document.getElementById("staffModeHint").classList.toggle("hidden", !isStaff);
+      document.querySelectorAll(".staff-col").forEach(el => {
+        el.classList.toggle("hidden", !isStaff);
+      });
+    }
+
+    function openLoginModal() {
+      document.getElementById("loginErr").classList.add("hidden");
+      document.getElementById("loginUser").value = "";
+      document.getElementById("loginPass").value = "";
+      document.getElementById("loginModal").classList.remove("hidden");
+    }
+    function closeLoginModal() { document.getElementById("loginModal").classList.add("hidden"); }
+
+    function submitLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById("loginUser").value.trim();
+      const p = document.getElementById("loginPass").value.trim();
+      if (u === "Farmasi" && p === "123321") {
+        isStaff = true;
+        localStorage.setItem("rsss_farmasi_staff", "true");
+        closeLoginModal();
+        updateStaffUI();
+        renderTable();
+      } else {
+        document.getElementById("loginErr").classList.remove("hidden");
+      }
+    }
+
+    function logoutStaff() {
+      isStaff = false;
+      localStorage.removeItem("rsss_farmasi_staff");
+      updateStaffUI();
+      renderTable();
+    }
+
+    async function loadRekapData() {
+      try {
+        const [resRekap, resQueue] = await Promise.all([
+          fetch(REKAP_DB_URL + "?t=" + Date.now()),
+          fetch(QUEUE_DB_URL + "?t=" + Date.now())
+        ]);
+        const dataRekap = resRekap.ok ? await resRekap.json() : {};
+        const dataQueue = resQueue.ok ? await resQueue.json() : null;
+
+        document.getElementById("connDot").className = "conn-dot online";
+        rekapMap = (dataRekap && typeof dataRekap === "object") ? dataRekap : {};
+
+        // Sinkronisasi otomatis dengan antrian aktif hari ini jika nilai antrian lebih tinggi
+        const today = getWitaTodayStr();
+        if (dataQueue) {
+          const cur = rekapMap[today] || { A: 0, B: 0, C: 0, racikanList: [], tidakDapatList: [] };
+          const rList = Array.from(new Set([...parseTokens(cur.racikanList), ...parseTokens(dataQueue.diracik)]));
+          const tList = Array.from(new Set([...parseTokens(cur.tidakDapatList), ...parseTokens(dataQueue.tidakDapat)]));
+          rekapMap[today] = {
+            A: Math.max(Number(cur.A) || 0, Number(dataQueue.A) || 0),
+            B: Math.max(Number(cur.B) || 0, Number(dataQueue.B) || 0),
+            C: Math.max(Number(cur.C) || 0, Number(dataQueue.C) || 0),
+            racikan: Math.max(Number(cur.racikan) || 0, rList.length),
+            racikanList: rList,
+            tidakDapatList: tList
+          };
+        }
+
+        applyFilter();
+      } catch (e) {
+        document.getElementById("connDot").className = "conn-dot";
+      }
+    }
+
+    function applyFilter() {
+      const start = document.getElementById("startDate").value;
+      const end = document.getElementById("endDate").value;
+
+      const dates = Object.keys(rekapMap).filter(d => {
+        if (start && d < start) return false;
+        if (end && d > end) return false;
+        return true;
+      }).sort((a, b) => b.localeCompare(a)); // Terbaru di atas
+
+      filteredRows = dates.map(d => {
+        const item = rekapMap[d] || {};
+        const tList = parseTokens(item.tidakDapatList);
+        const rList = parseTokens(item.racikanList);
+        const racikanCount = item.racikan !== undefined ? Number(item.racikan) : rList.length;
+        return {
+          date: d,
+          A: Number(item.A) || 0,
+          B: Number(item.B) || 0,
+          C: Number(item.C) || 0,
+          racikan: racikanCount,
+          tidakCount: tList.length,
+          tidakList: tList
+        };
+      });
+
+      renderSummary();
+      renderTable();
+    }
+
+    function renderSummary() {
+      let sumA = 0, sumB = 0, sumC = 0, sumRacik = 0, sumTidak = 0;
+      filteredRows.forEach(r => {
+        sumA += r.A;
+        sumB += r.B;
+        sumC += r.C;
+        sumRacik += r.racikan;
+        sumTidak += r.tidakCount;
+      });
+
+      document.getElementById("totA").textContent = sumA + " Resep";
+      document.getElementById("totB").textContent = sumB + " Resep";
+      document.getElementById("totC").textContent = sumC + " Resep";
+      document.getElementById("totRacikan").textContent = sumRacik + " Resep";
+      document.getElementById("totTidak").textContent = sumTidak + " Resep";
+    }
+
+    function renderTable() {
+      const tbody = document.getElementById("rekapTableBody");
+      if (filteredRows.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#94a3b8;">Belum ada data rekap pada rentang tanggal ini</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredRows.map(r => {
+        const tidakText = r.tidakCount > 0
+          ? r.tidakCount + " (" + r.tidakList.join(", ") + ")"
+          : "0";
+
+        const aksiCell = isStaff
+          ? '<td class="col-aksi"><button type="button" onclick="openEditModal(\'' + r.date + '\')" class="btn-edit-row">✏️ Edit</button></td>'
+          : '';
+
+        return '<tr>' +
+          '<td>' + formatTanggalIndo(r.date) + '</td>' +
+          '<td>' + r.A + '</td>' +
+          '<td>' + r.B + '</td>' +
+          '<td>' + r.C + '</td>' +
+          '<td>' + r.racikan + '</td>' +
+          '<td class="td-tidak">' + tidakText + '</td>' +
+          aksiCell +
+        '</tr>';
+      }).join("");
+    }
+
+    function openEditModal(dateStr) {
+      if (!isStaff) return;
+      const targetDate = dateStr || getWitaTodayStr();
+      const existing = rekapMap[targetDate] || {};
+      const tList = parseTokens(existing.tidakDapatList);
+      const rList = parseTokens(existing.racikanList);
+
+      document.getElementById("editDate").value = targetDate;
+      document.getElementById("editA").value = Number(existing.A) || 0;
+      document.getElementById("editB").value = Number(existing.B) || 0;
+      document.getElementById("editC").value = Number(existing.C) || 0;
+      document.getElementById("editRacikan").value = existing.racikan !== undefined ? Number(existing.racikan) : rList.length;
+      document.getElementById("editTidakList").value = tList.join(", ");
+      document.getElementById("editModal").classList.remove("hidden");
+    }
+
+    function closeEditModal() {
+      document.getElementById("editModal").classList.add("hidden");
+    }
+
+    async function saveEditRecord(e) {
+      e.preventDefault();
+      if (!isStaff) return;
+
+      const dateVal = document.getElementById("editDate").value;
+      if (!dateVal) return;
+
+      const valA = Math.max(0, parseInt(document.getElementById("editA").value, 10) || 0);
+      const valB = Math.max(0, parseInt(document.getElementById("editB").value, 10) || 0);
+      const valC = Math.max(0, parseInt(document.getElementById("editC").value, 10) || 0);
+      const valRacikan = Math.max(0, parseInt(document.getElementById("editRacikan").value, 10) || 0);
+      const tList = Array.from(new Set(parseTokens(document.getElementById("editTidakList").value)));
+
+      const updatedItem = {
+        A: valA,
+        B: valB,
+        C: valC,
+        racikan: valRacikan,
+        tidakDapatList: tList,
+        updatedAt: new Date().toISOString()
+      };
+
+      rekapMap[dateVal] = updatedItem;
+
+      try {
+        await fetch("https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/rekap_resep/" + dateVal + ".json", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedItem)
+        });
+      } catch (err) {}
+
+      closeEditModal();
+      applyFilter();
+    }
+
+    function exportCSV() {
+      if (filteredRows.length === 0) {
+        alert("Tidak ada data untuk diexport.");
+        return;
+      }
+      const headers = ["Tanggal", "Umum (A)", "BPJS (B)", "Prioritas (C)", "Resep Racikan", "Tidak Dapat Obat"];
+      const lines = [headers.join(",")];
+      filteredRows.forEach(r => {
+        const tidakStr = r.tidakCount > 0 ? '"' + r.tidakCount + ' (' + r.tidakList.join(', ') + ')"' : "0";
+        lines.push([r.date, r.A, r.B, r.C, r.racikan, tidakStr].join(","));
+      });
+      const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Rekap_Resep_Farmasi_" + document.getElementById("startDate").value + "_sd_" + document.getElementById("endDate").value + ".csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    initDefaultDates();
+    updateStaffUI();
+    loadRekapData();
+  </script>
+</body>
+</html>
