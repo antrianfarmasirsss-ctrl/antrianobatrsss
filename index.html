@@ -418,7 +418,7 @@
     .qr-big-box { padding: 12px; background-color: #ffffff; border: 2px solid #065f46; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; }
     .qr-url-lbl { font-size: 12px; font-weight: 800; color: #064e3b; word-break: break-all; margin: 10px 0 12px 0; }
 
-    /* KHUSUS TAMPILAN HP (< 640px) */
+    /* KHUSUS TAMPILAN HP (< 640px): FIT 1 LAYAR PENUH & NOMOR ANTRIAN DIPERBESAR */
     @media (max-width: 639px) {
       #btnFullscreen { display: none !important; }
       html, body {
@@ -433,10 +433,19 @@
         padding: 6px;
         min-height: 0;
       }
-      .sec-utama { margin-bottom: 6px; }
-      .card-tag { font-size: 12px; padding: 4px 2px; }
-      .sec-panel { padding: 6px; }
-      .sec-diracik, .sec-konfirmasi { margin-bottom: 6px; }
+      .sec-utama {
+        margin-bottom: 6px;
+      }
+      .card-tag {
+        font-size: 12px;
+        padding: 4px 2px;
+      }
+      .sec-panel {
+        padding: 6px;
+      }
+      .sec-diracik, .sec-konfirmasi {
+        margin-bottom: 6px;
+      }
       .sec-panel .list-wrap {
         overflow-y: auto;
         align-content: flex-start;
@@ -486,6 +495,7 @@
       .header-sub { font-size: 15px; }
       .card-tag { font-size: 34px; padding: 10px 12px; }
 
+      /* NOMOR UTAMA (UMUM, BPJS, PRIORITAS) TETAP PALING MENONJOL */
       .num-lg { font-size: 120px; }
       .num-md { font-size: 96px; }
       .num-sm { font-size: 80px; }
@@ -494,6 +504,7 @@
       .panel-title { font-size: 22px; }
       .empty-msg { font-size: 18px; }
 
+      /* NOMOR RACIKAN (NILAI TENGAH PROPORSIONAL) */
       .token-badge {
         font-size: 56px;
         padding: 8px 28px;
@@ -519,7 +530,7 @@
       }
     }
 
-    /* UKURAN KONFIRMASI & TIDAK DAPAT OBAT */
+    /* SAMAKAN UKURAN KONFIRMASI & TIDAK DAPAT OBAT DENGAN UKURAN RACIKAN SAAT 2 BARIS */
     #secKonfirmasi .token-badge,
     #secTidak .token-badge {
       font-size: 21px;
@@ -1304,11 +1315,12 @@
       }
     }
 
-    function confirmResetAll() {
+    async function confirmResetAll() {
       if (!isStaff) return;
       if (confirm("apa anda yakin ingin reset semua tampilan no antrian kembali k 0 ?")) {
-        resetBackup = {
-          activeDate: state.activeDate || getWitaTodayKey(),
+        const targetDate = state.activeDate || getWitaTodayKey();
+        const snapshot = {
+          activeDate: targetDate,
           A: state.A || 0,
           B: state.B || 0,
           C: state.C || 0,
@@ -1316,11 +1328,27 @@
           konfirmasi: [...(state.konfirmasi || [])],
           tidakDapat: [...(state.tidakDapat || [])]
         };
+        resetBackup = snapshot;
+
+        const hasData = (snapshot.A > 0) ||
+                        (snapshot.B > 0) ||
+                        (snapshot.C > 0) ||
+                        (snapshot.diracik.length > 0) ||
+                        (snapshot.tidakDapat.length > 0);
+        if (hasData) {
+          await recordDailyRekap({
+            targetDate: targetDate,
+            snapshot: snapshot,
+            addRacikan: snapshot.diracik,
+            addTidak: snapshot.tidakDapat
+          });
+        }
+
         state = { activeDate: getWitaTodayKey(), A: 0, B: 0, C: 0, diracik: [], konfirmasi: [], tidakDapat: [] };
         historyStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
         addedHistoryStack = { diracik: [], konfirmasi: [], tidakDapat: [] };
         renderUI();
-        saveToFirebase();
+        await saveToFirebase();
       }
     }
 
