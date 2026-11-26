@@ -203,6 +203,145 @@
       flex-shrink: 0;
     }
 
+    /* KARTU PENGUMUMAN: NO ANTRIAN YANG TIDAK MENDAPATKAN RESEP OBAT DARI POLI */
+    .tidak-dapat-card {
+      margin-top: 20px;
+      background-color: #ffffff;
+      border-radius: 18px;
+      border: 2px solid #7e22ce;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      padding: 18px 16px;
+    }
+    .td-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .td-warn-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background-color: #fef3c7;
+      color: #b45309;
+      border: 1px solid #f59e0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .td-title {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 900;
+      color: #1e293b;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+    }
+    .td-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+    }
+    .td-filter-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .td-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #334155;
+    }
+    .td-date-input {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #0f172a;
+      background-color: #ffffff;
+      font-family: inherit;
+      outline: none;
+    }
+    .td-date-input:focus {
+      border-color: #7e22ce;
+    }
+    .td-date-summary {
+      font-size: 13px;
+      font-weight: 800;
+      color: #581c87;
+    }
+    .td-list-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 48px;
+      align-items: center;
+      padding: 6px 2px 14px 2px;
+    }
+    .td-token {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      font-weight: 900;
+      padding: 6px 15px;
+      border-radius: 12px;
+      border-width: 2px;
+      border-style: solid;
+      line-height: 1.1;
+    }
+    .tok-a { background-color: #f0f9ff; color: #0c4a6e; border-color: #0ea5e9; }
+    .tok-b { background-color: #ecfdf5; color: #064e3b; border-color: #059669; }
+    .tok-c { background-color: #fffbeb; color: #78350f; border-color: #f59e0b; }
+    .tok-def { background-color: #f3e8ff; color: #581c87; border-color: #9333ea; }
+    .td-empty {
+      width: 100%;
+      margin: 4px 0;
+      font-size: 13px;
+      color: #64748b;
+      font-style: italic;
+    }
+    .td-notice {
+      background-color: #faf5ff;
+      border: 1px solid #d8b4fe;
+      border-radius: 12px;
+      padding: 11px 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      font-size: 12.5px;
+      line-height: 1.45;
+      color: #3b0764;
+      font-weight: 500;
+    }
+    .td-notice-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background-color: #7e22ce;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
     /* FOOTER */
     .portal-footer {
       background-color: #064e3b;
@@ -274,6 +413,12 @@
       }
       .card-title { font-size: 21px; }
       .card-desc { font-size: 14px; }
+      .tidak-dapat-card {
+        padding: 22px 24px;
+      }
+      .td-title { font-size: 17px; }
+      .td-token { font-size: 21px; padding: 7px 18px; }
+      .td-notice { font-size: 13.5px; }
     }
 
     /* RESPONSIF LAYAR BESAR / TV (>= 1024px) */
@@ -287,6 +432,7 @@
       }
       .card-title { font-size: 24px; }
       .card-desc { font-size: 15px; }
+      .td-title { font-size: 19px; }
     }
   </style>
 </head>
@@ -360,6 +506,31 @@
         <span class="card-arrow">➔</span>
       </button>
     </div>
+
+    <!-- KOTAK PENGUMUMAN: NO ANTRIAN YANG TIDAK MENDAPATKAN RESEP OBAT DARI POLI -->
+    <section class="tidak-dapat-card" aria-label="No antrian yang tidak mendapatkan resep obat dari poli">
+      <div class="td-header">
+        <div class="td-warn-icon">⚠️</div>
+        <h3 class="td-title">NO ANTRIAN YANG TIDAK MENDAPATKAN RESEP OBAT DARI POLI</h3>
+      </div>
+
+      <div class="td-filter-row">
+        <div class="td-filter-left">
+          <label for="filterTidakDapatDate" class="td-label">Pilih Tanggal:</label>
+          <input type="date" id="filterTidakDapatDate" class="td-date-input" />
+        </div>
+        <div id="tdDateSummary" class="td-date-summary">Memuat data...</div>
+      </div>
+
+      <div id="tdTokenList" class="td-list-wrap">
+        <p class="td-empty">Memuat daftar nomor antrian...</p>
+      </div>
+
+      <div class="td-notice">
+        <span class="td-notice-icon">i</span>
+        <span>Mohon maaf, no antrian diatas tidak mendapatkan resep obat dari poli, jika ada yg ingin ditanyakan bisa hubungi kami bagian farmasi lewat wadah yg disediakan.</span>
+      </div>
+    </section>
   </main>
 
   <!-- FOOTER -->
@@ -378,6 +549,36 @@
   </div>
 
   <script>
+    const BASE_DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi";
+    const QUEUE_STATE_URL = BASE_DB_URL + "/queue_state.json";
+    const REKAP_BASE_URL = BASE_DB_URL + "/rekap_resep";
+
+    function getWitaDateKey(dateObj) {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Makassar",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      }).formatToParts(dateObj || new Date());
+      const y = parts.find(function(p) { return p.type === "year"; }).value;
+      const m = parts.find(function(p) { return p.type === "month"; }).value;
+      const d = parts.find(function(p) { return p.type === "day"; }).value;
+      return y + "-" + m + "-" + d;
+    }
+
+    function formatTanggalIndo(dateKey) {
+      if (!dateKey || !/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) return dateKey || "-";
+      const parts = dateKey.split("-");
+      const dt = new Date(Date.UTC(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 4, 0, 0));
+      return dt.toLocaleDateString("id-ID", {
+        timeZone: "Asia/Makassar",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      });
+    }
+
     function updateWitaClock() {
       const now = new Date();
       const timeStr = now.toLocaleTimeString("id-ID", {
@@ -399,6 +600,111 @@
     }
     updateWitaClock();
     setInterval(updateWitaClock, 1000);
+
+    function sortQueueTokens(list) {
+      const order = { A: 1, B: 2, C: 3 };
+      const clean = list.map(function(item) {
+        return String(item || "").trim().toUpperCase();
+      }).filter(Boolean);
+
+      return Array.from(new Set(clean)).sort(function(a, b) {
+        const mA = a.match(/^([ABC])?(\d+)(.*)$/i);
+        const mB = b.match(/^([ABC])?(\d+)(.*)$/i);
+        const lA = mA && mA[1] ? mA[1].toUpperCase() : "";
+        const lB = mB && mB[1] ? mB[1].toUpperCase() : "";
+        const rA = lA ? (order[lA] || 99) : 0;
+        const rB = lB ? (order[lB] || 99) : 0;
+        if (rA !== rB) return rA - rB;
+        const nA = mA ? parseInt(mA[2], 10) : 999999;
+        const nB = mB ? parseInt(mB[2], 10) : 999999;
+        if (nA !== nB) return nA - nB;
+        return a.localeCompare(b, "id", { numeric: true });
+      });
+    }
+
+    function getBadgeColor(token) {
+      const f = token.charAt(0).toUpperCase();
+      if (f === "A") return "tok-a";
+      if (f === "B") return "tok-b";
+      if (f === "C") return "tok-c";
+      return "tok-def";
+    }
+
+    function extractTokensFromRecord(rec) {
+      if (!rec || typeof rec !== "object") return [];
+      if (Array.isArray(rec.tidakDapatList)) return rec.tidakDapatList;
+      if (Array.isArray(rec.tidakDapat)) return rec.tidakDapat;
+      if (typeof rec.tidakDapatList === "string") {
+        return rec.tidakDapatList.split(/[\s,;]+/).filter(Boolean);
+      }
+      return [];
+    }
+
+    const dateInput = document.getElementById("filterTidakDapatDate");
+    let activeTodayKey = getWitaDateKey();
+    dateInput.value = activeTodayKey;
+
+    async function loadTidakDapatByDate(selectedDate) {
+      const listEl = document.getElementById("tdTokenList");
+      const summaryEl = document.getElementById("tdDateSummary");
+      const targetDate = selectedDate || dateInput.value || getWitaDateKey();
+      const todayKey = getWitaDateKey();
+
+      try {
+        let combined = [];
+
+        // Ambil dari riwayat rekap_resep/{tanggal}.json
+        const rekapRes = await fetch(REKAP_BASE_URL + "/" + encodeURIComponent(targetDate) + ".json?t=" + Date.now());
+        if (rekapRes.ok) {
+          const rekapData = await rekapRes.json();
+          combined = combined.concat(extractTokensFromRecord(rekapData));
+        }
+
+        // Jika tanggal yang dipilih adalah hari ini, gabungkan juga dengan data live queue_state.json
+        if (targetDate === todayKey) {
+          const liveRes = await fetch(QUEUE_STATE_URL + "?t=" + Date.now());
+          if (liveRes.ok) {
+            const liveData = await liveRes.json();
+            if (liveData && (!liveData.activeDate || liveData.activeDate === todayKey)) {
+              combined = combined.concat(extractTokensFromRecord(liveData));
+            }
+          }
+        }
+
+        const sortedTokens = sortQueueTokens(combined);
+        const tglText = formatTanggalIndo(targetDate);
+        summaryEl.textContent = tglText + " (Total: " + sortedTokens.length + " Resep)";
+
+        if (sortedTokens.length === 0) {
+          listEl.innerHTML = '<p class="td-empty">Tidak ada nomor antrian yang tidak mendapatkan resep obat pada tanggal ini.</p>';
+        } else {
+          listEl.innerHTML = sortedTokens.map(function(tok) {
+            const cls = getBadgeColor(tok);
+            return '<span class="td-token ' + cls + '">' + tok + '</span>';
+          }).join("");
+        }
+      } catch (e) {
+        summaryEl.textContent = formatTanggalIndo(targetDate);
+        listEl.innerHTML = '<p class="td-empty">Gagal memuat data. Periksa koneksi internet Anda.</p>';
+      }
+    }
+
+    dateInput.addEventListener("change", function() {
+      loadTidakDapatByDate(dateInput.value);
+    });
+
+    // Muat awal dan perbarui otomatis setiap 5 detik jika sedang melihat tanggal hari ini
+    loadTidakDapatByDate(dateInput.value);
+    setInterval(function() {
+      const currentToday = getWitaDateKey();
+      if (dateInput.value === activeTodayKey && currentToday !== activeTodayKey) {
+        activeTodayKey = currentToday;
+        dateInput.value = currentToday;
+      }
+      if (dateInput.value === currentToday) {
+        loadTidakDapatByDate(currentToday);
+      }
+    }, 5000);
 
     function openComingSoon(title, desc) {
       document.getElementById("modalTitle").textContent = title;
