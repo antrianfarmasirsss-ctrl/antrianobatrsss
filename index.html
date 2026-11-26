@@ -731,6 +731,7 @@
   <script>
     const DB_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/queue_state.json";
     const REKAP_BASE_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/rekap_resep/";
+    const VISITOR_STATS_URL = "https://antrianobatfarmasirsss-default-rtdb.asia-southeast1.firebasedatabase.app/depo_central_farmasi/visitor_stats.json";
     const PUBLIC_QR_URL = "https://tinyurl.com/antrianfarmasirsss";
 
     function getWitaTodayKey() {
@@ -748,6 +749,39 @@
     let resetBackup = null;
     let isStaff = localStorage.getItem("rsss_farmasi_staff") === "true";
     let isRollingOverDate = false;
+
+    async function trackVisitorSession() {
+      const todayKey = getWitaTodayKey();
+      const sessionKey = "rsss_visited_" + todayKey;
+
+      try {
+        if (sessionStorage.getItem(sessionKey) === "1") {
+          return;
+        }
+        sessionStorage.setItem(sessionKey, "1");
+
+        const res = await fetch(VISITOR_STATS_URL + "?t=" + Date.now());
+        const current = (res.ok ? await res.json() : null) || {};
+        const byDate = (current.byDate && typeof current.byDate === "object") ? current.byDate : {};
+
+        const nextTotal = (Number(current.total) || 0) + 1;
+        const nextToday = (Number(byDate[todayKey]) || 0) + 1;
+        byDate[todayKey] = nextToday;
+
+        const payload = {
+          total: nextTotal,
+          byDate: byDate,
+          lastVisitDate: todayKey,
+          updatedAt: new Date().toISOString()
+        };
+
+        await fetch(VISITOR_STATS_URL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {}
+    }
 
     async function recordDailyRekap(options) {
       const opts = options || {};
@@ -1334,6 +1368,7 @@
 
     window.addEventListener("resize", adjustDynamicLayout);
     renderUI();
+    trackVisitorSession();
     syncFromFirebase();
     setInterval(syncFromFirebase, 2500);
   </script>
